@@ -11,7 +11,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
 html, body {
   height: 100%;
   background: #08080e;
@@ -19,301 +18,291 @@ html, body {
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
-
-/* Noise grain overlay */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Ambient glow blobs */
 .blob {
   position: fixed;
   border-radius: 50%;
-  filter: blur(80px);
+  filter: blur(90px);
   pointer-events: none;
   z-index: 0;
-  transition: opacity 1s ease;
+  transition: opacity 1.2s ease;
 }
 .blob-1 {
-  width: 320px; height: 320px;
-  background: radial-gradient(circle, rgba(220,30,60,0.18) 0%, transparent 70%);
-  top: -80px; left: 50%;
-  transform: translateX(-50%);
+  width: 340px; height: 340px;
+  background: radial-gradient(circle, rgba(220,30,60,0.15) 0%, transparent 70%);
+  top: -100px; left: 50%; transform: translateX(-50%);
 }
 .blob-2 {
-  width: 260px; height: 260px;
-  background: radial-gradient(circle, rgba(255,90,30,0.1) 0%, transparent 70%);
-  bottom: 60px; right: -60px;
+  width: 280px; height: 280px;
+  background: radial-gradient(circle, rgba(255,90,30,0.09) 0%, transparent 70%);
+  bottom: 40px; right: -80px;
 }
-.blob-1.active { background: radial-gradient(circle, rgba(220,30,60,0.35) 0%, transparent 70%); }
-.blob-2.active { background: radial-gradient(circle, rgba(255,90,30,0.2) 0%, transparent 70%); }
+.blob-1.on { background: radial-gradient(circle, rgba(220,30,60,0.38) 0%, transparent 70%); }
+.blob-2.on { background: radial-gradient(circle, rgba(255,90,30,0.22) 0%, transparent 70%); }
 
-/* Layout */
 .wrap {
-  position: relative;
-  z-index: 1;
+  position: relative; z-index: 1;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  padding: 2rem;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 0; padding: 2rem;
 }
 
-/* Title */
+/* ── Title ── */
 .title-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 3.5rem;
+  display: flex; flex-direction: column; align-items: center;
+  margin-bottom: 3rem; user-select: none;
 }
-.title-eyebrow {
-  font-family: 'Inter', sans-serif;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.2);
-  margin-bottom: 10px;
+.eyebrow {
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 4px; text-transform: uppercase;
+  color: rgba(255,255,255,0.18);
+  margin-bottom: 8px;
 }
-.title-main {
+.title {
   font-family: 'Unbounded', sans-serif;
-  font-size: 38px;
-  font-weight: 900;
-  letter-spacing: -1.5px;
-  line-height: 0.95;
-  position: relative;
-  user-select: none;
+  font-size: 40px; font-weight: 900;
+  letter-spacing: -1.5px; line-height: 0.9;
+  display: flex; flex-direction: column; align-items: center;
 }
-.title-main .t1 {
-  display: block;
-  background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.55) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.t1 {
+  background: linear-gradient(160deg, #ffffff 0%, rgba(255,255,255,0.5) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
-.title-main .t2 {
-  display: block;
+.t2 {
   background: linear-gradient(135deg, #ff2d4e 0%, #ff6820 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
 
-/* Button */
+/* ── Button ── */
 #btn {
   position: relative;
-  width: 210px;
-  height: 210px;
-  border-radius: 50%;
-  border: none;
-  background: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 3rem;
+  width: 220px; height: 220px;
+  border-radius: 50%; border: none; background: none;
+  cursor: pointer; margin-bottom: 2.5rem;
+  display: flex; align-items: center; justify-content: center;
 }
-
-/* Rings */
 .ring {
-  position: absolute;
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.06);
-  pointer-events: none;
+  position: absolute; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.055);
+  pointer-events: none; transition: border-color 0.4s;
 }
-.ring-1 { inset: 0; }
-.ring-2 { inset: -16px; border-color: rgba(255,255,255,0.035); }
-.ring-3 { inset: -32px; border-color: rgba(255,255,255,0.02); }
-
-#btn.on .ring-1 {
-  border-color: rgba(255,45,78,0.5);
-  animation: ring-pulse 2s ease-out infinite;
+.r1 { inset: 0; }
+.r2 { inset: -18px; border-color: rgba(255,255,255,0.03); }
+.r3 { inset: -36px; border-color: rgba(255,255,255,0.015); }
+#btn.on .r1 { border-color: rgba(255,45,78,0.55); animation: rp 2s ease-out infinite; }
+#btn.on .r2 { border-color: rgba(255,45,78,0.28); animation: rp 2s ease-out infinite 0.35s; }
+#btn.on .r3 { border-color: rgba(255,45,78,0.13); animation: rp 2s ease-out infinite 0.7s; }
+@keyframes rp {
+  0%,100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.5; }
 }
-#btn.on .ring-2 {
-  border-color: rgba(255,45,78,0.25);
-  animation: ring-pulse 2s ease-out infinite 0.3s;
-}
-#btn.on .ring-3 {
-  border-color: rgba(255,45,78,0.12);
-  animation: ring-pulse 2s ease-out infinite 0.6s;
-}
-
-@keyframes ring-pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.04); opacity: 0.6; }
-}
-
-/* Inner circle */
-.btn-face {
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #1a1a24 0%, #0e0e18 100%);
-  border: 1px solid rgba(255,255,255,0.08);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  position: relative;
-  overflow: hidden;
+.face {
+  width: 168px; height: 168px; border-radius: 50%;
+  background: linear-gradient(150deg, #191924 0%, #0d0d18 100%);
+  border: 1px solid rgba(255,255,255,0.07);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 9px; position: relative; overflow: hidden;
   transition: border-color 0.4s, background 0.4s;
 }
-.btn-face::before {
+.face::before {
   content: '';
-  position: absolute;
-  top: -40%;
-  left: -40%;
-  width: 80%;
-  height: 80%;
-  background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%);
+  position: absolute; top: -35%; left: -35%;
+  width: 70%; height: 70%;
+  background: radial-gradient(circle, rgba(255,255,255,0.035) 0%, transparent 70%);
   pointer-events: none;
 }
-#btn.on .btn-face {
-  background: linear-gradient(145deg, #1f0d12 0%, #130810 100%);
-  border-color: rgba(255,45,78,0.3);
+#btn.on .face {
+  background: linear-gradient(150deg, #1e0d13 0%, #120810 100%);
+  border-color: rgba(255,45,78,0.28);
 }
-
-.btn-icon {
-  font-size: 38px;
-  line-height: 1;
+.face-icon {
+  font-size: 40px; line-height: 1;
   transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
 }
-#btn.on .btn-icon { transform: scale(1.15); }
-
-.btn-text {
-  font-family: 'Inter', sans-serif;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.3);
+#btn.on .face-icon { transform: scale(1.2); }
+.face-label {
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  color: rgba(255,255,255,0.28);
   transition: color 0.3s;
 }
-#btn.on .btn-text { color: rgba(255,80,100,0.8); }
+#btn.on .face-label { color: rgba(255,80,100,0.75); }
 
-/* Counter */
-.counter-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  min-height: 60px;
+/* ── Counter ── */
+.counter-area {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  min-height: 66px;
 }
 #counter {
   font-family: 'Unbounded', sans-serif;
-  font-size: 48px;
-  font-weight: 900;
-  letter-spacing: -3px;
+  font-size: 50px; font-weight: 900; letter-spacing: -3px;
   background: linear-gradient(135deg, #ff2d4e, #ff6820);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  opacity: 0;
-  transform: translateY(8px);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  opacity: 0; transform: translateY(10px);
   transition: opacity 0.4s, transform 0.4s;
 }
-#counter.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
+#counter.show { opacity: 1; transform: translateY(0); }
 #status {
-  font-size: 12px;
-  color: rgba(255,255,255,0.22);
-  letter-spacing: 0.5px;
-  min-height: 16px;
+  font-size: 12px; color: rgba(255,255,255,0.2);
+  letter-spacing: 0.4px; min-height: 17px;
   transition: color 0.3s;
 }
-#status.hit {
-  color: rgba(255,80,100,0.7);
+#status.hit { color: rgba(255,90,110,0.7); }
+
+/* ── Loading overlay ── */
+#loader {
+  position: fixed; inset: 0; z-index: 99;
+  background: #08080e;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1.2rem;
+  transition: opacity 0.5s;
+}
+#loader.hidden { opacity: 0; pointer-events: none; }
+.loader-logo {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 32px; font-weight: 900;
+  background: linear-gradient(135deg, #ff2d4e, #ff6820);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.loader-bar-wrap {
+  width: 160px; height: 2px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px; overflow: hidden;
+}
+.loader-bar {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, #ff2d4e, #ff6820);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+.loader-txt {
+  font-size: 11px; color: rgba(255,255,255,0.25);
+  letter-spacing: 0.5px;
 }
 </style>
 </head>
 <body>
 
-<div class="blob blob-1" id="blob1"></div>
-<div class="blob blob-2" id="blob2"></div>
+<div id="loader">
+  <div class="loader-logo">МАТОГРАФ</div>
+  <div class="loader-bar-wrap"><div class="loader-bar" id="lbar"></div></div>
+  <div class="loader-txt" id="ltxt">загружаю словари…</div>
+</div>
+
+<div class="blob blob-1" id="b1"></div>
+<div class="blob blob-2" id="b2"></div>
 
 <div class="wrap">
-
   <div class="title-block">
-    <div class="title-eyebrow">детектор мата</div>
-    <div class="title-main">
+    <div class="eyebrow">детектор мата</div>
+    <div class="title">
       <span class="t1">МАТ</span>
       <span class="t2">ОГРАФ</span>
     </div>
   </div>
 
   <button id="btn" onclick="toggle()">
-    <div class="ring ring-1"></div>
-    <div class="ring ring-2"></div>
-    <div class="ring ring-3"></div>
-    <div class="btn-face">
-      <div class="btn-icon" id="btn-icon">🎙</div>
-      <div class="btn-text" id="btn-text">начать</div>
+    <div class="ring r1"></div>
+    <div class="ring r2"></div>
+    <div class="ring r3"></div>
+    <div class="face">
+      <div class="face-icon" id="ficon">🎙</div>
+      <div class="face-label" id="flabel">начать</div>
     </div>
   </button>
 
-  <div class="counter-block">
+  <div class="counter-area">
     <div id="counter">0</div>
     <div id="status">нажмите, чтобы начать</div>
   </div>
-
 </div>
 
 <script>
 /* ══ ВПИШИТЕ СВОЙ URL ══ */
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxY-Sxvy8IvyBX3TYqSAprY72atFyHBykLG1-l5L9_NuWydEbNRBDF5gfN4Qhf-fwcT/exec';
 
-/* ══ Словари ══ */
-var WORDS = {
-  'ru-RU': ['блять','блядь','блядина','ёбаный','ёбана','ёбнутый','пиздец','пизда','пиздить',
-    'хуй','хуя','хуевый','хуесос','нахуй','похуй','залупа','мудак','мудила','сука',
-    'шлюха','уёб','заеб','наеб','выеб','ёпт','йопт','бля','херня','хер','долбоёб',
-    'пидор','пидарас','манда','ёбать','трахать'],
-  'uk-UA': ['блядь','блядина','їбать','їбаний','їбнутий','пизда','пиздець','пиздити',
-    'хуй','хуйня','нахуй','похуй','залупа','мудак','мудило','сука','шльоха','курва',
-    'уїб','заїб','наїб','виїб','довбойоб','підор','підарас','манда','херня'],
-  'en-US': ['fuck','fucking','fucked','fucker','motherfucker','shit','shitty','bullshit',
-    'bitch','asshole','bastard','crap','damn','goddamn','cunt','cock','dick','dickhead',
-    'whore','slut','prick','twat'],
-  'ka-GE': ['ბოზი','ბოზო','ბოზობა','ნაბოზევი','ჭყლეტი','შაშვი','ძაღლის შვილი',
-    'ჯანდაბა','ბოზის შვილი','გამიქრი']
+/* ══ Словари — загружаются с jsDelivr (CDN для GitHub) ══ */
+var BASE = 'https://cdn.jsdelivr.net/gh/LDNOOBWV2/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words_V2@main/data/';
+var SOURCES = [
+  { key: 'ru', url: BASE + 'ru.txt', label: 'Русский' },
+  { key: 'uk', url: BASE + 'uk.txt', label: 'Українська' },
+  { key: 'en', url: BASE + 'en.txt', label: 'English'   }
+];
+
+/* Грузинский — jsDelivr недоступен для ka, оставляем ручную базу */
+var DICT = {
+  ru: [], uk: [], en: [],
+  ka: ['ბოზი','ბოზო','ბოზობა','ნაბოზევი','ჭყლეტი','შაშვი',
+       'ძაღლის შვილი','ჯანდაბა','ბოზის შვილი','გამიქრი',
+       'პირი','სულელი','კრეტინი','იდიოტი','გაუპატიურება']
 };
 
+var LANG_LABELS = { ru:'Русский', uk:'Українська', en:'English', ka:'ქართული' };
+
+/* Определение языка по символам */
 var LANG_RE = {
-  'ka-GE': /[\u10D0-\u10FF]/,
-  'uk-UA': /[іїєґ]/i,
-  'ru-RU': /[а-яёА-ЯЁ]/,
-  'en-US': /[a-zA-Z]/
+  ka: /[\u10D0-\u10FF]/,
+  uk: /[іїєґ]/i,
+  ru: /[а-яёА-ЯЁ]/,
+  en: /[a-zA-Z]/
 };
-var LANG_LABELS = { 'ru-RU':'Русский','uk-UA':'Українська','en-US':'English','ka-GE':'ქართული' };
-
 function detectLang(text) {
   for (var l in LANG_RE) { if (LANG_RE[l].test(text)) return l; }
-  return 'ru-RU';
+  return 'ru';
 }
 
+/* ══ Загрузка словарей ══ */
+var loaded = 0;
+function setProgress(pct, txt) {
+  document.getElementById('lbar').style.width = pct + '%';
+  document.getElementById('ltxt').textContent = txt;
+}
+
+function loadDicts() {
+  var total = SOURCES.length;
+  var done = 0;
+  SOURCES.forEach(function(src) {
+    setProgress(Math.round(done / total * 80), 'загружаю ' + src.label + '…');
+    fetch(src.url)
+      .then(function(r) { return r.text(); })
+      .then(function(txt) {
+        DICT[src.key] = txt.split('\n')
+          .map(function(w) { return w.trim().toLowerCase(); })
+          .filter(function(w) { return w.length > 1; });
+        done++;
+        setProgress(Math.round(done / total * 95), 'загружаю словари…');
+        if (done === total) finish();
+      })
+      .catch(function() {
+        /* Не удалось загрузить — продолжаем без этого языка */
+        done++;
+        if (done === total) finish();
+      });
+  });
+}
+
+function finish() {
+  setProgress(100, 'готово');
+  setTimeout(function() {
+    document.getElementById('loader').classList.add('hidden');
+    initRec();
+  }, 400);
+}
+
+/* ══ Состояние ══ */
 var listening = false, rec = null, total = 0, lat = '', lng = '';
 
 if (navigator.geolocation) {
   navigator.geolocation.watchPosition(
     function(p) { lat = p.coords.latitude.toFixed(6); lng = p.coords.longitude.toFixed(6); },
-    function() {},
-    { enableHighAccuracy: true }
+    function() {}, { enableHighAccuracy: true }
   );
 }
 
-function buildRec() {
+/* ══ Распознавание ══ */
+function initRec() {
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { setStatus('браузер не поддерживает распознавание речи', false); return false; }
+  if (!SR) { setStatus('браузер не поддерживает речь', false); return; }
   rec = new SR();
   rec.lang = 'ru-RU';
   rec.continuous = true;
@@ -329,48 +318,53 @@ function buildRec() {
     if (listening) setTimeout(startRec, 1000);
   };
   rec.onend = function() { if (listening) setTimeout(startRec, 300); };
-  return true;
 }
-
 function startRec() { try { rec.start(); } catch(e) {} }
 
 function toggle() {
-  if (!rec && !buildRec()) return;
+  if (!rec) return;
   var btn = document.getElementById('btn');
-  var b1 = document.getElementById('blob1');
-  var b2 = document.getElementById('blob2');
   if (listening) {
     listening = false;
     try { rec.stop(); } catch(e) {}
     btn.classList.remove('on');
-    b1.classList.remove('active'); b2.classList.remove('active');
-    document.getElementById('btn-icon').textContent = '🎙';
-    document.getElementById('btn-text').textContent = 'начать';
+    document.getElementById('b1').classList.remove('on');
+    document.getElementById('b2').classList.remove('on');
+    document.getElementById('ficon').textContent = '🎙';
+    document.getElementById('flabel').textContent = 'начать';
     setStatus('нажмите, чтобы начать', false);
   } else {
     listening = true;
     startRec();
     btn.classList.add('on');
-    b1.classList.add('active'); b2.classList.add('active');
-    document.getElementById('btn-icon').textContent = '🔴';
-    document.getElementById('btn-text').textContent = 'слушаю';
+    document.getElementById('b1').classList.add('on');
+    document.getElementById('b2').classList.add('on');
+    document.getElementById('ficon').textContent = '🔴';
+    document.getElementById('flabel').textContent = 'слушаю';
     setStatus('слушаю…', false);
   }
 }
 
+/* ══ Анализ ══ */
 function analyze(text) {
   var lang = detectLang(text);
+  var words = DICT[lang] || [];
   var lower = text.toLowerCase();
-  (WORDS[lang] || []).forEach(function(w) {
-    if (lower.includes(w.toLowerCase())) hit(w, text, lang);
-  });
+  var found = false;
+  for (var i = 0; i < words.length; i++) {
+    if (words[i] && lower.includes(words[i])) {
+      hit(words[i], text, lang);
+      found = true;
+      break; /* одно срабатывание на фразу */
+    }
+  }
 }
 
 function hit(word, context, lang) {
   total++;
   var cnt = document.getElementById('counter');
   cnt.textContent = total;
-  cnt.classList.add('visible');
+  cnt.classList.add('show');
   setStatus('поймал: «' + word + '»', true);
   setTimeout(function() { if (listening) setStatus('слушаю…', false); }, 2500);
   var now = new Date();
@@ -384,6 +378,7 @@ function hit(word, context, lang) {
   });
 }
 
+/* ══ Google Sheets ══ */
 function send(data) {
   if (!SCRIPT_URL || SCRIPT_URL.indexOf('ВАШ') !== -1) return;
   fetch(SCRIPT_URL, {
@@ -398,6 +393,9 @@ function setStatus(txt, isHit) {
   el.textContent = txt;
   el.className = isHit ? 'hit' : '';
 }
+
+/* ══ Старт ══ */
+loadDicts();
 </script>
 </body>
 </html>
