@@ -8,64 +8,52 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#08080e">
 <title>Матограф</title>
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@900&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body {
-  height: 100%;
-  background: #08080e;
-  overflow: hidden;
-  font-family: 'Inter', sans-serif;
-  -webkit-font-smoothing: antialiased;
+  height: 100%; background: #08080e; overflow: hidden;
+  font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased;
 }
 .blob {
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(90px);
-  pointer-events: none;
-  z-index: 0;
+  position: fixed; border-radius: 50%;
+  filter: blur(90px); pointer-events: none; z-index: 0;
   transition: opacity 1.2s ease;
 }
-.blob-1 {
+.b1 {
   width: 340px; height: 340px;
-  background: radial-gradient(circle, rgba(220,30,60,0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(220,30,60,0.14) 0%, transparent 70%);
   top: -100px; left: 50%; transform: translateX(-50%);
 }
-.blob-2 {
+.b2 {
   width: 280px; height: 280px;
-  background: radial-gradient(circle, rgba(255,90,30,0.09) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255,90,30,0.08) 0%, transparent 70%);
   bottom: 40px; right: -80px;
 }
-.blob-1.on { background: radial-gradient(circle, rgba(220,30,60,0.38) 0%, transparent 70%); }
-.blob-2.on { background: radial-gradient(circle, rgba(255,90,30,0.22) 0%, transparent 70%); }
+.b1.on { background: radial-gradient(circle, rgba(220,30,60,0.38) 0%, transparent 70%); }
+.b2.on { background: radial-gradient(circle, rgba(255,90,30,0.22) 0%, transparent 70%); }
 
 .wrap {
-  position: relative; z-index: 1;
-  height: 100%;
+  position: relative; z-index: 1; height: 100%;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  gap: 0; padding: 2rem;
+  padding: 2rem;
 }
-
-/* ── Title ── */
 .title-block {
   display: flex; flex-direction: column; align-items: center;
   margin-bottom: 3rem; user-select: none;
 }
 .eyebrow {
-  font-size: 10px; font-weight: 500;
-  letter-spacing: 4px; text-transform: uppercase;
-  color: rgba(255,255,255,0.18);
-  margin-bottom: 8px;
+  font-size: 10px; font-weight: 500; letter-spacing: 4px;
+  text-transform: uppercase; color: rgba(255,255,255,0.18); margin-bottom: 8px;
 }
 .title {
-  font-family: 'Unbounded', sans-serif;
-  font-size: 40px; font-weight: 900;
-  letter-spacing: -1.5px; line-height: 0.9;
+  font-family: 'Unbounded', sans-serif; font-size: 40px;
+  font-weight: 900; letter-spacing: -1.5px; line-height: 0.9;
   display: flex; flex-direction: column; align-items: center;
 }
 .t1 {
-  background: linear-gradient(160deg, #ffffff 0%, rgba(255,255,255,0.5) 100%);
+  background: linear-gradient(160deg, #fff 0%, rgba(255,255,255,0.5) 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
 .t2 {
@@ -73,10 +61,8 @@ html, body {
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
 
-/* ── Button ── */
 #btn {
-  position: relative;
-  width: 220px; height: 220px;
+  position: relative; width: 220px; height: 220px;
   border-radius: 50%; border: none; background: none;
   cursor: pointer; margin-bottom: 2.5rem;
   display: flex; align-items: center; justify-content: center;
@@ -94,19 +80,19 @@ html, body {
 #btn.on .r3 { border-color: rgba(255,45,78,0.13); animation: rp 2s ease-out infinite 0.7s; }
 @keyframes rp {
   0%,100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.05); opacity: 0.5; }
+  50%      { transform: scale(1.05); opacity: 0.5; }
 }
 .face {
   width: 168px; height: 168px; border-radius: 50%;
   background: linear-gradient(150deg, #191924 0%, #0d0d18 100%);
   border: 1px solid rgba(255,255,255,0.07);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
   gap: 9px; position: relative; overflow: hidden;
   transition: border-color 0.4s, background 0.4s;
 }
 .face::before {
-  content: '';
-  position: absolute; top: -35%; left: -35%;
+  content: ''; position: absolute; top: -35%; left: -35%;
   width: 70%; height: 70%;
   background: radial-gradient(circle, rgba(255,255,255,0.035) 0%, transparent 70%);
   pointer-events: none;
@@ -121,76 +107,34 @@ html, body {
 }
 #btn.on .face-icon { transform: scale(1.2); }
 .face-label {
-  font-size: 10px; font-weight: 500;
-  letter-spacing: 2.5px; text-transform: uppercase;
-  color: rgba(255,255,255,0.28);
+  font-size: 10px; font-weight: 500; letter-spacing: 2.5px;
+  text-transform: uppercase; color: rgba(255,255,255,0.28);
   transition: color 0.3s;
 }
 #btn.on .face-label { color: rgba(255,80,100,0.75); }
 
-/* ── Counter ── */
 .counter-area {
-  display: flex; flex-direction: column; align-items: center; gap: 5px;
-  min-height: 66px;
+  display: flex; flex-direction: column; align-items: center; gap: 5px; min-height: 66px;
 }
 #counter {
-  font-family: 'Unbounded', sans-serif;
-  font-size: 50px; font-weight: 900; letter-spacing: -3px;
+  font-family: 'Unbounded', sans-serif; font-size: 50px;
+  font-weight: 900; letter-spacing: -3px;
   background: linear-gradient(135deg, #ff2d4e, #ff6820);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  opacity: 0; transform: translateY(10px);
-  transition: opacity 0.4s, transform 0.4s;
+  opacity: 0; transform: translateY(10px); transition: opacity 0.4s, transform 0.4s;
 }
 #counter.show { opacity: 1; transform: translateY(0); }
 #status {
   font-size: 12px; color: rgba(255,255,255,0.2);
-  letter-spacing: 0.4px; min-height: 17px;
-  transition: color 0.3s;
+  letter-spacing: 0.4px; min-height: 17px; transition: color 0.3s;
 }
-#status.hit { color: rgba(255,90,110,0.7); }
-
-/* ── Loading overlay ── */
-#loader {
-  position: fixed; inset: 0; z-index: 99;
-  background: #08080e;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 1.2rem;
-  transition: opacity 0.5s;
-}
-#loader.hidden { opacity: 0; pointer-events: none; }
-.loader-logo {
-  font-family: 'Unbounded', sans-serif;
-  font-size: 32px; font-weight: 900;
-  background: linear-gradient(135deg, #ff2d4e, #ff6820);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-.loader-bar-wrap {
-  width: 160px; height: 2px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 2px; overflow: hidden;
-}
-.loader-bar {
-  height: 100%; width: 0%;
-  background: linear-gradient(90deg, #ff2d4e, #ff6820);
-  border-radius: 2px;
-  transition: width 0.3s ease;
-}
-.loader-txt {
-  font-size: 11px; color: rgba(255,255,255,0.25);
-  letter-spacing: 0.5px;
-}
+#status.hit { color: rgba(255,90,110,0.75); }
 </style>
 </head>
 <body>
 
-<div id="loader">
-  <div class="loader-logo">МАТОГРАФ</div>
-  <div class="loader-bar-wrap"><div class="loader-bar" id="lbar"></div></div>
-  <div class="loader-txt" id="ltxt">загружаю словари…</div>
-</div>
-
-<div class="blob blob-1" id="b1"></div>
-<div class="blob blob-2" id="b2"></div>
+<div class="blob b1" id="b1"></div>
+<div class="blob b2" id="b2"></div>
 
 <div class="wrap">
   <div class="title-block">
@@ -221,76 +165,128 @@ html, body {
 /* ══ ВПИШИТЕ СВОЙ URL ══ */
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxY-Sxvy8IvyBX3TYqSAprY72atFyHBykLG1-l5L9_NuWydEbNRBDF5gfN4Qhf-fwcT/exec';
 
-/* ══ Словари — загружаются с jsDelivr (CDN для GitHub) ══ */
-var BASE = 'https://cdn.jsdelivr.net/gh/LDNOOBWV2/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words_V2@main/data/';
-var SOURCES = [
-  { key: 'ru', url: BASE + 'ru.txt', label: 'Русский' },
-  { key: 'uk', url: BASE + 'uk.txt', label: 'Українська' },
-  { key: 'en', url: BASE + 'en.txt', label: 'English'   }
-];
-
-/* Грузинский — jsDelivr недоступен для ka, оставляем ручную базу */
+/* ══════════════════════════════════════════
+   СЛОВАРИ — только самые сильные слова.
+   Проверка идёт по ЦЕЛЫМ словам (не подстрокам):
+   «хуй» не сработает на «тихуанский» или «уху».
+   ══════════════════════════════════════════ */
 var DICT = {
-  ru: [], uk: [], en: [],
-  ka: ['ბოზი','ბოზო','ბოზობა','ნაბოზევი','ჭყლეტი','შაშვი',
-       'ძაღლის შვილი','ჯანდაბა','ბოზის შვილი','გამიქრი',
-       'პირი','სულელი','კრეტინი','იდიოტი','გაუპატიურება']
+  ru: [
+    'хуй','хуя','хую','хуем','хуёв','хуйня','хуйнёй','хуйней',
+    'пизда','пизды','пизде','пизду','пиздой','пиздец','пиздёж','пиздёт','пиздит','пиздить','пиздато',
+    'ёбаный','ёбаная','ёбаные','ёбаного','ёбаную','ёбать','ёбнуть','ёбнул','ёбнула',
+    'еблан','ебало','ебать','ебал','ебала',
+    'блядь','блядина','блядский','бляди','блядство',
+    'мудак','мудаки','мудака','мудаку','мудаком',
+    'залупа','залупу','залупой',
+    'долбоёб','долбоёба','долбоёбу','долбоёбом',
+    'пидор','пидора','пидору','пидором','пидорас','пидараса',
+    'сука','суки','суку','сукой','суке',
+    'ублюдок','ублюдка','ублюдку','ублюдком',
+    'шлюха','шлюхи','шлюху','шлюхой',
+    'манда','манду','мандой',
+    'нахуй','похуй','захуй','ахуеть','ахуел','ахуела','охуеть','охуел','охуела',
+    'заебал','заебала','заебали','заебись','заебать',
+    'уёбок','уёбка','уёбку','уёбком',
+    'выёбываться','выёбывается','въебать','въебал',
+    'пиздануть','пизданул','пизданула',
+    'ёбнуться','ёбнулся','ёбнулась',
+    'бля','блять'
+  ],
+  uk: [
+    'хуй','хуя','хую','хуєм','хуйня',
+    'пизда','пізди','пізді','пізду','піздою','піздець','піздить',
+    'їбати','їбав','їбала','їбаний','їбана','їбані',
+    'блядь','блядина','блядський','бляді',
+    'мудак','мудаки','мудака','мудаку','мудаком',
+    'залупа','залупу','залупою',
+    'довбойоб','довбойоба','довбойобу',
+    'підор','підора','підорас','підараса',
+    'сука','суки','суку','сукою',
+    'шльоха','шльохи','шльоху','шльохою',
+    'курва','курви','курву','курвою',
+    'манда','манду','мандою',
+    'нахуй','похуй','захуй','охуіти','охуів','охуіла',
+    'заїбав','заїбала','заїбали','заїбись',
+    'уйобок','уйобка','уйобку',
+    'бля','блять'
+  ],
+  en: [
+    'fuck','fucks','fucked','fucking','fucker','fuckers','fuckup','fuckface',
+    'motherfuck','motherfucker','motherfucking','motherfuckers',
+    'shit','shits','shitted','shitting','shitty','bullshit','horseshit',
+    'cunt','cunts','cunting',
+    'cock','cocks','cocksucker','cocksucking',
+    'dick','dicks','dickhead','dickheads',
+    'ass','asses','asshole','assholes','asshat','asswipe',
+    'bitch','bitches','bitching','bitched','son of a bitch',
+    'bastard','bastards',
+    'whore','whores','whorish',
+    'slut','sluts','slutty',
+    'prick','pricks',
+    'twat','twats',
+    'pussy','pussies',
+    'wanker','wankers','wanking',
+    'faggot','faggots',
+    'nigger','niggers',
+    'crap','crappy',
+    'damn','goddamn','goddamned',
+    'piss','pissed','pissing','pissoff'
+  ],
+  ka: [
+    'ბოზი','ბოზო','ბოზობა','ნაბოზევი','ბოზის შვილი',
+    'ჭყლეტი','შაშვი','ძაღლის შვილი','ჯანდაბა','გამიქრი',
+    'დედაშენი','დედამოვტყან','დედამოვარდინე',
+    'ტრაკი','ტრაკში','მიყიდე','გათხოვდი'
+  ]
 };
 
-var LANG_LABELS = { ru:'Русский', uk:'Українська', en:'English', ka:'ქართული' };
-
-/* Определение языка по символам */
+/* Языковые маркеры */
 var LANG_RE = {
   ka: /[\u10D0-\u10FF]/,
   uk: /[іїєґ]/i,
   ru: /[а-яёА-ЯЁ]/,
   en: /[a-zA-Z]/
 };
+var LANG_LABELS = { ru:'Русский', uk:'Українська', en:'English', ka:'ქართული' };
+
 function detectLang(text) {
   for (var l in LANG_RE) { if (LANG_RE[l].test(text)) return l; }
   return 'ru';
 }
 
-/* ══ Загрузка словарей ══ */
-var loaded = 0;
-function setProgress(pct, txt) {
-  document.getElementById('lbar').style.width = pct + '%';
-  document.getElementById('ltxt').textContent = txt;
+/* ══ Поиск ЦЕЛЫХ слов ══
+   Разбиваем текст на токены по пробелам и знакам препинания,
+   затем сравниваем каждый токен с каждым словом из словаря.
+   Это исключает ложные срабатывания на подстроки.          */
+function tokenize(text) {
+  return text.toLowerCase()
+    .replace(/[^а-яёa-zіїєґ\u10D0-\u10FF\s]/gi, ' ')
+    .split(/\s+/)
+    .filter(function(w) { return w.length > 0; });
 }
 
-function loadDicts() {
-  var total = SOURCES.length;
-  var done = 0;
-  SOURCES.forEach(function(src) {
-    setProgress(Math.round(done / total * 80), 'загружаю ' + src.label + '…');
-    fetch(src.url)
-      .then(function(r) { return r.text(); })
-      .then(function(txt) {
-        DICT[src.key] = txt.split('\n')
-          .map(function(w) { return w.trim().toLowerCase(); })
-          .filter(function(w) { return w.length > 1; });
-        done++;
-        setProgress(Math.round(done / total * 95), 'загружаю словари…');
-        if (done === total) finish();
-      })
-      .catch(function() {
-        /* Не удалось загрузить — продолжаем без этого языка */
-        done++;
-        if (done === total) finish();
-      });
-  });
-}
-
-function finish() {
-  setProgress(100, 'готово');
-  setTimeout(function() {
-    document.getElementById('loader').classList.add('hidden');
-    initRec();
-  }, 400);
+function findBadWord(text, lang) {
+  var tokens = tokenize(text);
+  var dict = DICT[lang] || [];
+  /* Строим Set для быстрого поиска */
+  var tokenSet = {};
+  tokens.forEach(function(t) { tokenSet[t] = true; });
+  for (var i = 0; i < dict.length; i++) {
+    var w = dict[i].toLowerCase();
+    /* Многословные выражения — проверяем через includes */
+    if (w.indexOf(' ') !== -1) {
+      if (text.toLowerCase().includes(w)) return dict[i];
+    } else {
+      if (tokenSet[w]) return dict[i];
+    }
+  }
+  return null;
 }
 
 /* ══ Состояние ══ */
 var listening = false, rec = null, total = 0, lat = '', lng = '';
+var silentCtx = null; /* AudioContext для подавления пиликанья */
 
 if (navigator.geolocation) {
   navigator.geolocation.watchPosition(
@@ -299,34 +295,61 @@ if (navigator.geolocation) {
   );
 }
 
+/* Создаём тихий AudioContext — браузер на iOS/Android не пикает
+   когда есть активный аудио-граф                              */
+function keepSilent() {
+  try {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    silentCtx = new AC();
+    var osc = silentCtx.createOscillator();
+    var gain = silentCtx.createGain();
+    gain.gain.value = 0; /* абсолютная тишина */
+    osc.connect(gain);
+    gain.connect(silentCtx.destination);
+    osc.start();
+  } catch(e) {}
+}
+
 /* ══ Распознавание ══ */
 function initRec() {
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) { setStatus('браузер не поддерживает речь', false); return; }
   rec = new SR();
   rec.lang = 'ru-RU';
-  rec.continuous = true;
+  rec.continuous = false;   /* на телефоне continuous = бесконечные пики */
   rec.interimResults = false;
   rec.maxAlternatives = 1;
+
   rec.onresult = function(e) {
     for (var i = e.resultIndex; i < e.results.length; i++) {
       if (e.results[i].isFinal) analyze(e.results[i][0].transcript);
     }
   };
   rec.onerror = function(ev) {
-    if (ev.error === 'no-speech') return;
-    if (listening) setTimeout(startRec, 1000);
+    if (ev.error === 'no-speech' || ev.error === 'aborted') { restartSoon(); return; }
+    restartSoon(1200);
   };
-  rec.onend = function() { if (listening) setTimeout(startRec, 300); };
+  rec.onend = function() { restartSoon(); };
 }
-function startRec() { try { rec.start(); } catch(e) {} }
+
+var restartTimer = null;
+function restartSoon(ms) {
+  clearTimeout(restartTimer);
+  if (!listening) return;
+  restartTimer = setTimeout(function() {
+    if (!listening) return;
+    try { rec.start(); } catch(e) {}
+  }, ms || 80);
+}
 
 function toggle() {
-  if (!rec) return;
+  if (!rec) { initRec(); }
   var btn = document.getElementById('btn');
   if (listening) {
     listening = false;
-    try { rec.stop(); } catch(e) {}
+    clearTimeout(restartTimer);
+    try { rec.stop(); rec.abort(); } catch(e) {}
     btn.classList.remove('on');
     document.getElementById('b1').classList.remove('on');
     document.getElementById('b2').classList.remove('on');
@@ -334,8 +357,9 @@ function toggle() {
     document.getElementById('flabel').textContent = 'начать';
     setStatus('нажмите, чтобы начать', false);
   } else {
+    keepSilent();
     listening = true;
-    startRec();
+    try { rec.start(); } catch(e) {}
     btn.classList.add('on');
     document.getElementById('b1').classList.add('on');
     document.getElementById('b2').classList.add('on');
@@ -348,16 +372,8 @@ function toggle() {
 /* ══ Анализ ══ */
 function analyze(text) {
   var lang = detectLang(text);
-  var words = DICT[lang] || [];
-  var lower = text.toLowerCase();
-  var found = false;
-  for (var i = 0; i < words.length; i++) {
-    if (words[i] && lower.includes(words[i])) {
-      hit(words[i], text, lang);
-      found = true;
-      break; /* одно срабатывание на фразу */
-    }
-  }
+  var word = findBadWord(text, lang);
+  if (word) hit(word, text, lang);
 }
 
 function hit(word, context, lang) {
@@ -393,9 +409,6 @@ function setStatus(txt, isHit) {
   el.textContent = txt;
   el.className = isHit ? 'hit' : '';
 }
-
-/* ══ Старт ══ */
-loadDicts();
 </script>
 </body>
 </html>
