@@ -141,7 +141,31 @@
           }
           config = normalizeConfig(merged);
         } else {
-          config = normalizeConfig({ ...config, ...remote });
+          /* Merge characters: for each character, start from remote but keep
+             local availability fields (availableFrom, availableTo, weatherRule, active, enabled)
+             if remote has empty/default values — so admin time/weather restrictions are preserved */
+          const localCharMap = new Map(config.characters.map(ch => [ch.id, ch]));
+          const availabilityFields = ["availableFrom", "availableTo", "weatherRule", "active", "enabled"];
+          const mergedCharacters = remote.characters.map(remoteChar => {
+            const localChar = localCharMap.get(remoteChar.id);
+            if (!localChar) return remoteChar;
+            const merged = { ...remoteChar };
+            for (const field of availabilityFields) {
+              const localVal = localChar[field];
+              const remoteVal = remoteChar[field];
+              /* If remote is empty/missing but local has a real value, keep local */
+              if ((remoteVal === "" || remoteVal === undefined || remoteVal === null) && localVal !== "" && localVal !== undefined && localVal !== null) {
+                merged[field] = localVal;
+              }
+            }
+            return merged;
+          });
+          /* Also keep any local characters not in remote */
+          const remoteIds = new Set(remote.characters.map(ch => ch.id));
+          localCharMap.forEach((ch, id) => {
+            if (!remoteIds.has(id)) mergedCharacters.push(ch);
+          });
+          config = normalizeConfig({ ...remote, characters: mergedCharacters });
         }
         applyDynamicSettings();
         /* Re-sanitize state: weather or config may have changed, making some characters unavailable */
@@ -441,8 +465,11 @@
     const minutes = now.getHours() * 60 + now.getMinutes();
     const from = timeToMinutes(character.availableFrom || "00:00");
     const to = timeToMinutes(character.availableTo || "23:59");
-    if (from <= to) return minutes >= from && minutes <= to;
-    return minutes >= from || minutes <= to;
+    const inRange = from <= to
+      ? minutes >= from && minutes <= to
+      : minutes >= from || minutes <= to;
+    console.log(`[availability] ${character.name}: from=${character.availableFrom} to=${character.availableTo} now=${minutes} inRange=${inRange}`);
+    return inRange;
   }
 
   function timeToMinutes(value) {
@@ -719,7 +746,11 @@
 
   function revealCharacter(participant, character) {
     /* Safety check: never reveal an unavailable character */
-    if (!isCharacterAvailable(character)) return;
+    if (!isCharacterAvailable(character)) {
+      console.log(`[reveal] BLOCKED: ${character.name} is not available, availableFrom=${character.availableFrom} availableTo=${character.availableTo} active=${character.active} enabled=${character.enabled} weatherRule=${character.weatherRule} currentWeather=${config.settings.currentWeather}`);
+      return;
+    }
+    console.log(`[reveal] ALLOWED: ${character.name}`);
 
     if (!participant.spots[character.id]) {
       participant.spots[character.id] = {
