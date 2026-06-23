@@ -23,7 +23,6 @@
 
     <form class="panel" id="registration-form">
       <label>
-        Имя
         <input id="guest-name" name="guestName" autocomplete="given-name" required minlength="2" placeholder="Твое имя" />
       </label>
       <label>
@@ -162,6 +161,7 @@
     </div>
     <p class="finish-copy" id="finish-copy"></p>
     <div class="finish-score-block">
+      <span class="finish-trophy">🏆</span>
       <strong id="final-score">0</strong>
       <span>баллов</span>
     </div>
@@ -187,8 +187,9 @@
         <span class="finish-stat-label">прогресс</span>
       </div>
     </div>
+    <div class="finish-prizes" id="finish-prizes"></div>
     <button class="primary" id="save-result-button" type="button">Сохранить результат</button>
-    <canvas id="result-card" width="600" height="800" style="display:none"></canvas>
+    <canvas id="result-card" width="600" height="900" style="display:none"></canvas>
   </section>
 </main>
 

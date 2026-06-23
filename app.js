@@ -42,6 +42,7 @@
       finishSuccess: "Отличный результат! Вы собрали всех хранителей отеля.",
       finishSupport: "Квест завершен. Не все загадки покорились, но коллекция собрана.",
       nameBlockList: [],
+      prizeInfo: "",
       ...(raw.settings || {})
     };
 
@@ -754,6 +755,11 @@
     byId("finish-room").textContent = participant.room;
     byId("finish-found").textContent = `${progress.found}/${progress.characters.length}`;
     byId("finish-progress").textContent = `${progress.percent}%`;
+    const prizesEl = byId("finish-prizes");
+    if (prizesEl) {
+      prizesEl.textContent = config.settings.prizeInfo || "";
+      prizesEl.style.display = config.settings.prizeInfo ? "" : "none";
+    }
     drawResultCard(participant, progress);
   }
 
@@ -793,14 +799,19 @@
     const finishText = allSolved ? config.settings.finishSuccess : config.settings.finishSupport;
     wrapText(ctx, finishText, 40, 135, W - 80, 20);
 
+    /* Trophy */
+    ctx.font = "64px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("\uD83C\uDFC6", W / 2, 240);
+
     /* Score */
     ctx.fillStyle = "#192027";
     ctx.font = "900 72px Inter, system-ui, sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText(String(participant.score), W / 2, 290);
+    ctx.fillText(String(participant.score), W / 2, 320);
     ctx.fillStyle = "#65717b";
     ctx.font = "800 16px Inter, system-ui, sans-serif";
-    ctx.fillText("БАЛЛОВ", W / 2, 320);
+    ctx.fillText("БАЛЛОВ", W / 2, 350);
 
     /* Divider */
     ctx.fillStyle = "#d9d0c0";
@@ -837,11 +848,19 @@
     ctx.fillStyle = barGrad;
     ctx.fillRect(40, 700, Math.max(12, (W - 80) * progress.percent / 100), 12);
 
+    /* Prize info */
+    if (config.settings.prizeInfo) {
+      ctx.fillStyle = "#1f7a5b";
+      ctx.font = "700 14px Inter, system-ui, sans-serif";
+      ctx.textAlign = "left";
+      wrapText(ctx, config.settings.prizeInfo, 40, 740, W - 80, 18);
+    }
+
     /* Footer */
     ctx.fillStyle = "#65717b";
     ctx.font = "500 13px Inter, system-ui, sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("Спасибо за игру!", W / 2, 760);
+    ctx.fillText("Спасибо за игру!", W / 2, 780);
   }
 
   function wrapText(ctx, text, x, y, maxWidth, lineHeight) {

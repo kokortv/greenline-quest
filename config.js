@@ -14,7 +14,8 @@ window.HOTEL_QUEST_CONFIG = {
       "test",
       "asdf",
       "qwerty"
-    ]
+    ],
+    prizeInfo: ""
   },
   rooms: [
     "101",

@@ -1093,11 +1093,14 @@ input:disabled {
 
 /* === Finish Screen === */
 #finish-screen {
-  display: flex;
   flex-direction: column;
   gap: 20px;
   min-height: calc(100vh - 42px);
   animation: screenIn 0.4s ease both;
+}
+
+#finish-screen.screen-active {
+  display: flex;
 }
 
 .finish-header {
@@ -1129,6 +1132,24 @@ input:disabled {
   font-size: 3.5rem;
   line-height: 1;
   letter-spacing: -0.02em;
+}
+
+.finish-trophy {
+  font-size: 3rem;
+  line-height: 1;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.finish-prizes {
+  padding: 16px 18px;
+  border-radius: var(--radius-sm);
+  background: var(--green-light);
+  border: 1px solid rgba(31, 122, 91, 0.2);
+  color: var(--green);
+  font-weight: 700;
+  font-size: 0.9rem;
+  line-height: 1.45;
 }
 
 .finish-score-block span {

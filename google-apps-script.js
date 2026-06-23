@@ -60,7 +60,8 @@ function getDefaultConfig() {
       finishTitle: "Все хранители найдены",
       finishSuccess: "Отличный результат! Вы собрали всех хранителей отеля.",
       finishSupport: "Квест завершен. Не все загадки покорились, но коллекция собрана.",
-      nameBlockList: ["дурак", "идиот", "бред", "test", "asdf", "qwerty"]
+      nameBlockList: ["дурак", "идиот", "бред", "test", "asdf", "qwerty"],
+      prizeInfo: ""
     },
     rooms: ["101", "102", "103", "104", "201", "202", "203", "204", "301", "302", "303", "304"],
     characters: [

@@ -31,6 +31,7 @@
     byId("finish-title").value = config.settings.finishTitle;
     byId("finish-success").value = config.settings.finishSuccess;
     byId("finish-support").value = config.settings.finishSupport;
+    byId("prize-info").value = config.settings.prizeInfo || "";
     byId("rooms").value = config.rooms.join(", ");
     renderCharacters();
     renderPlayers();
@@ -232,6 +233,7 @@
     config.settings.finishTitle = byId("finish-title").value.trim();
     config.settings.finishSuccess = byId("finish-success").value.trim();
     config.settings.finishSupport = byId("finish-support").value.trim();
+    config.settings.prizeInfo = byId("prize-info").value.trim();
     config.rooms = byId("rooms").value.split(",").map((room) => room.trim()).filter(Boolean);
   }
 
