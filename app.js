@@ -479,7 +479,9 @@
   /** Get character image based on state: not-found → found → solved */
   function getCharacterImage(character, state) {
     if (state === "solved" && character.imageSolved) return character.imageSolved;
-    return character.image || "";
+    if (state === "found" && character.image) return character.image;
+    /* default / hidden state — show placeholder */
+    return "images/persona-hidden.png";
   }
 
   // === Отрисовка пинов на карте (проценты) ===
@@ -1181,5 +1183,12 @@
     syncQueue();
   } else {
     setScreen("start");
+  }
+
+  /* Hide loading overlay once data is ready */
+  const loadingOverlay = byId("loading-overlay");
+  if (loadingOverlay) {
+    loadingOverlay.style.opacity = "0";
+    setTimeout(() => { loadingOverlay.style.display = "none"; }, 300);
   }
 })();

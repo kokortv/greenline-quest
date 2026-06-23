@@ -331,11 +331,34 @@
     return config.characters.filter((ch) => ch.enabled !== false);
   }
 
+  function isCharacterAvailable(character) {
+    if (!character) return false;
+    if (character.enabled === false) return false;
+
+    const weather = config.settings.currentWeather || "sun";
+    if (character.weatherRule && character.weatherRule !== "any" && character.weatherRule !== weather) {
+      return false;
+    }
+
+    if (character.availableFrom && character.availableTo) {
+      const now = new Date();
+      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+      const [fromH, fromM] = String(character.availableFrom).split(":").map(Number);
+      const [toH, toM] = String(character.availableTo).split(":").map(Number);
+      const fromMinutes = (fromH || 0) * 60 + (fromM || 0);
+      const toMinutes = (toH || 0) * 60 + (toM || 0);
+      if (nowMinutes < fromMinutes || nowMinutes > toMinutes) return false;
+    }
+
+    return true;
+  }
+
   function summarizeParticipant(participant) {
     const characters = getEnabledCharacters();
-    const found = characters.filter((ch) => participant.spots?.[ch.id]?.found).length;
-    const solved = characters.filter((ch) => participant.spots?.[ch.id]?.solved).length;
-    const completed = characters.filter((ch) => {
+    const availableCharacters = characters.filter(isCharacterAvailable);
+    const found = availableCharacters.filter((ch) => participant.spots?.[ch.id]?.found).length;
+    const solved = availableCharacters.filter((ch) => participant.spots?.[ch.id]?.solved).length;
+    const completed = availableCharacters.filter((ch) => {
       const spot = participant.spots?.[ch.id];
       return spot?.found && (spot.solved || spot.attempts >= config.settings.maxAttempts);
     }).length;
@@ -346,9 +369,9 @@
       score: participant.score || 0,
       found,
       solved,
-      total: characters.length,
-      progress: characters.length ? Math.round((found / characters.length) * 100) : 100,
-      status: participant.status === "completed" || completed === characters.length ? "completed" : "active",
+      total: availableCharacters.length,
+      progress: availableCharacters.length ? Math.round((found / availableCharacters.length) * 100) : 100,
+      status: participant.status === "completed" || completed === availableCharacters.length ? "completed" : "active",
       startedAt: participant.startedAt || "",
       completedAt: participant.completedAt || ""
     };

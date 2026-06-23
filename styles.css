@@ -19,6 +19,25 @@
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+/* === Loading overlay === */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--green-light);
+  transition: opacity 0.3s ease;
+}
+
+.loading-overlay .loading-content {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--green);
+  letter-spacing: 0.04em;
+}
+
 * {
   box-sizing: border-box;
 }
