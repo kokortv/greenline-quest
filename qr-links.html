@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ссылки для QR-кодов</title>
+  <style>
+    body {
+	  margin: 0;
+	  padding: 24px;
+	  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	  color: #192027;
+	  background: #f5f1e8;
+	}
+	main {
+	  max-width: 860px;
+	  margin: 0 auto;
+	}
+	h1 {
+	  margin: 0 0 8px;
+	}
+	p {
+	  color: #65717b;
+	}
+	.card {
+	  border: 1px solid #d9d0c0;
+	  border-radius: 8px;
+	  background: #fffdf7;
+	  padding: 14px;
+	}
+	.card strong,
+	.card code {
+	  display: block;
+	}
+	.card code {
+	  margin-top: 8px;
+	  padding: 10px;
+	  border-radius: 8px;
+	  background: #eef2f3;
+	  color: #2364aa;
+	  white-space: normal;
+	  overflow-wrap: anywhere;
+	  cursor: pointer;
+	  transition: background 0.15s;
+	}
+	.card code:hover {
+	  background: #dde5e8;
+	}
+	.card code:active {
+	  background: #cdd8dc;
+	}
+	.grid {
+	  display: grid;
+	  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	  gap: 12px;
+	}
+	.copy-toast {
+	  position: fixed;
+	  bottom: 24px;
+	  left: 50%;
+	  transform: translateX(-50%) translateY(20px);
+	  padding: 10px 20px;
+	  background: #192027;
+	  color: #fffdf7;
+	  border-radius: 8px;
+	  font-weight: 700;
+	  font-size: 0.9rem;
+	  opacity: 0;
+	  transition: opacity 0.2s, transform 0.2s;
+	  pointer-events: none;
+	  z-index: 999;
+	}
+	.copy-toast.is-visible {
+	  opacity: 1;
+	  transform: translateX(-50%) translateY(0);
+	}
+	@media print {
+	  body {
+		background: #fff;
+	  }
+	  .card code {
+		cursor: default;
+	  }
+	}
+  </style>
+</head>
+<body>
+<main>
+  <h1>Ссылки для QR-кодов</h1>
+  <p>Относительные ссылки работают из любой папки. Нажмите на ссылку, чтобы скопировать.</p>
+  <section class="grid" id="links"></section>
+</main>
+<div class="copy-toast" id="copy-toast">Скопировано</div>
+<script src="./config.js"></script>
+<script>
+  const linksContainer = document.querySelector("#links");
+  const toast = document.querySelector("#copy-toast");
+  let toastTimer = null;
+
+  function showToast(text) {
+	toast.textContent = text;
+	toast.classList.add("is-visible");
+	clearTimeout(toastTimer);
+	toastTimer = setTimeout(() => toast.classList.remove("is-visible"), 1600);
+  }
+
+  function copyText(text) {
+	if (navigator.clipboard && navigator.clipboard.writeText) {
+	  navigator.clipboard.writeText(text).then(() => showToast("Скопировано"));
+	} else {
+	  const ta = document.createElement("textarea");
+	  ta.value = text;
+	  ta.style.position = "fixed";
+	  ta.style.left = "-9999px";
+	  document.body.appendChild(ta);
+	  ta.select();
+	  document.execCommand("copy");
+	  document.body.removeChild(ta);
+	  showToast("Скопировано");
+	}
+  }
+
+  function render() {
+	const main = `<article class="card">
+	  <strong>Основной QR</strong>
+	  <span>Регистрация гостя</span>
+	  <code data-copy="index.html">index.html</code>
+	</article>`;
+
+	const characterLinks = window.HOTEL_QUEST_CONFIG.characters.map((character) => {
+	  const href = `index.html?spot=${encodeURIComponent(character.id)}`;
+	  return `<article class="card">
+		<strong>${character.place}</strong>
+		<span>${character.name}</span>
+		<code data-copy="${href}">${href}</code>
+	  </article>`;
+	}).join("");
+
+	linksContainer.innerHTML = main + characterLinks;
+
+	linksContainer.querySelectorAll("code[data-copy]").forEach((el) => {
+	  el.addEventListener("click", () => copyText(el.dataset.copy));
+	});
+  }
+
+  render();
+</script>
+</body>
+</html>

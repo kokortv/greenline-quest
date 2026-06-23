@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Админка квеста</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    .admin-app {
+          width: min(100%, 980px);
+        }
+        .admin-header {
+          display: flex;
+          justify-content: space-between;
+          gap: 16px;
+          align-items: flex-start;
+          margin-bottom: 18px;
+        }
+        .admin-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr);
+          gap: 14px;
+        }
+        .admin-section {
+          padding: 16px;
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          background: #fffdf7;
+          box-shadow: var(--shadow);
+        }
+        .admin-section h2 {
+          margin-bottom: 12px;
+        }
+        .form-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: 12px;
+        }
+        .form-grid.images {
+          grid-template-columns: 1fr 1fr;
+        }
+        .form-grid.hint {
+          grid-template-columns: 1fr 2fr;
+        }
+        select,
+        textarea {
+          width: 100%;
+          min-height: 48px;
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          padding: 10px 13px;
+          background: #fff;
+          color: var(--ink);
+        }
+        textarea {
+          min-height: 92px;
+          resize: vertical;
+        }
+        .character-editor {
+          display: grid;
+          gap: 12px;
+          padding: 14px;
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          background: #fff;
+        }
+        .editor-list {
+          display: grid;
+          gap: 12px;
+        }
+        .admin-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+        }
+        .admin-tabs {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 14px;
+        }
+        .admin-tab {
+          min-height: 44px;
+          padding: 0 14px;
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          background: #fffdf7;
+          color: var(--muted);
+          font-weight: 900;
+        }
+        .admin-tab.is-active {
+          background: #192027;
+          color: #fffdf7;
+        }
+        .admin-panel[hidden] {
+          display: none;
+        }
+        .players-table {
+          width: 100%;
+          border-collapse: collapse;
+          overflow: hidden;
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          background: #fff;
+        }
+        .players-table th,
+        .players-table td {
+          padding: 10px;
+          border-bottom: 1px solid var(--line);
+          text-align: left;
+          font-size: 0.9rem;
+          vertical-align: middle;
+        }
+        .players-table th {
+          color: var(--muted);
+          font-size: 0.76rem;
+          text-transform: uppercase;
+        }
+        .players-table .actions-cell {
+          display: flex;
+          gap: 6px;
+          flex-wrap: wrap;
+        }
+        .players-table .actions-cell button {
+          min-height: 32px;
+          padding: 0 12px;
+          border: 1px solid var(--line);
+          border-radius: 6px;
+          background: #fffdf7;
+          font-weight: 700;
+          font-size: 0.8rem;
+          cursor: pointer;
+        }
+        .players-table .actions-cell .reset-btn {
+          color: #d1663f;
+          border-color: #d1663f;
+        }
+        .players-table .actions-cell .delete-btn {
+          color: #b94d3e;
+          border-color: #b94d3e;
+        }
+        .players-empty {
+          color: var(--muted);
+        }
+        .admin-actions .secondary,
+        .admin-actions .primary {
+          width: auto;
+          padding: 0 16px;
+        }
+        .admin-status {
+          min-height: 24px;
+          color: var(--green);
+          font-weight: 800;
+        }
+        .image-preview {
+          max-width: 60px;
+          max-height: 60px;
+          border: 1px solid var(--line);
+          border-radius: 4px;
+          object-fit: contain;
+          background: #fff;
+        }
+        .hint-text {
+          font-size: 0.8rem;
+          color: var(--muted);
+          font-weight: 400;
+          margin-top: 4px;
+        }
+        .admin-map-wrap {
+          position: relative;
+          width: 100%;
+          border: 1px solid var(--line);
+          border-radius: var(--radius);
+          overflow: hidden;
+          background: #e8eef0;
+          margin-bottom: 14px;
+          box-shadow: var(--shadow-lg);
+        }
+        .admin-map {
+          position: relative;
+          width: 100%;
+          min-height: 50vh;
+          overflow: hidden;
+          background: #e8eef0;
+        }
+        .admin-map-image {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          object-position: center;
+        }
+        #admin-pins {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+        }
+        .admin-pin {
+          position: absolute;
+          width: 52px;
+          height: 52px;
+          border-radius: 50%;
+          transform: translate(-50%, -50%);
+          cursor: grab;
+          pointer-events: auto;
+          overflow: hidden;
+          background: transparent;
+          border: none;
+          box-shadow: none;
+          transition: transform 0.1s;
+        }
+        .admin-pin:active {
+          cursor: grabbing;
+        }
+        .admin-pin:hover {
+          transform: translate(-50%, -50%) scale(1.1);
+          z-index: 10;
+        }
+        .admin-pin img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+          pointer-events: none;
+          border-radius: 50%;
+        }
+        .admin-pin .pin-fallback {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1rem;
+          font-weight: 900;
+          color: #666;
+          background: #e0e0e0;
+          border-radius: 50%;
+        }
+        .admin-pin .pin-coords {
+          position: absolute;
+          bottom: -22px;
+          left: 50%;
+          transform: translateX(-50%);
+          font-size: 0.7rem;
+          color: var(--muted);
+          background: rgba(255, 253, 247, 0.9);
+          padding: 0 4px;
+          border-radius: 3px;
+          white-space: nowrap;
+          pointer-events: none;
+        }
+        .admin-pin.dragging {
+          opacity: 0.7;
+          z-index: 100;
+          cursor: grabbing;
+        }
+        @media (max-width: 560px) {
+          .admin-header {
+                display: grid;
+          }
+          .admin-actions .secondary,
+          .admin-actions .primary {
+                width: 100%;
+          }
+          .players-table th,
+          .players-table td {
+                padding: 6px;
+                font-size: 0.8rem;
+          }
+          .players-table .actions-cell button {
+                font-size: 0.7rem;
+                padding: 0 8px;
+                min-height: 28px;
+          }
+          .form-grid.images {
+                grid-template-columns: 1fr;
+          }
+          .form-grid.hint {
+                grid-template-columns: 1fr;
+          }
+          .admin-pin {
+                width: 8vmin;
+                height: 8vmin;
+                min-width: 30px;
+                min-height: 30px;
+                max-width: 50px;
+                max-height: 50px;
+          }
+          .admin-pin .pin-coords {
+                font-size: 8px;
+                bottom: calc(-1.4 * 8vmin);
+          }
+        }
+  </style>
+</head>
+<body>
+<main class="app admin-app">
+  <header class="admin-header">
+    <div>
+      <p class="eyebrow">Green Line Batumi</p>
+      <h1>Админка квеста</h1>
+    </div>
+    <div class="admin-actions">
+      <button class="primary" id="save-admin" type="button">Сохранить</button>
+      <button class="secondary" id="add-character" type="button">Добавить персонажа</button>
+    </div>
+  </header>
+
+  <nav class="admin-tabs" aria-label="Разделы админки">
+    <button class="admin-tab is-active" data-admin-tab="settings" type="button">Настройки</button>
+    <button class="admin-tab" data-admin-tab="map" type="button">Редактор карты</button>
+    <button class="admin-tab" data-admin-tab="players" type="button">Игроки</button>
+  </nav>
+
+  <section class="admin-grid admin-panel" id="settings-panel">
+    <div class="admin-section">
+      <h2>Общие настройки</h2>
+      <div class="form-grid">
+        <label>
+          Погода сегодня
+          <select id="current-weather">
+            <option value="sun">Солнце</option>
+            <option value="rain">Дождь</option>
+            <option value="cloudy">Облачно</option>
+          </select>
+        </label>
+        <label>
+          Попыток на загадку
+          <input id="max-attempts" inputmode="numeric" />
+        </label>
+        <label>
+          Название финала
+          <input id="finish-title" />
+        </label>
+      </div>
+      <div class="form-grid">
+        <label>
+          Текст хорошего финала
+          <textarea id="finish-success"></textarea>
+        </label>
+        <label>
+          Текст ободряющего финала
+          <textarea id="finish-support"></textarea>
+        </label>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <h2>Комнаты</h2>
+      <label>
+        Список номеров через запятую
+        <textarea id="rooms"></textarea>
+      </label>
+    </div>
+
+    <div class="admin-section">
+      <h2>Персонажи</h2>
+      <div class="editor-list" id="characters-editor"></div>
+    </div>
+
+    <p class="admin-status" id="admin-status" role="status"></p>
+  </section>
+
+  <section class="admin-grid admin-panel" id="map-panel" hidden>
+    <div class="admin-section">
+      <h2>Редактор карты</h2>
+      <p class="fineprint">Перетаскивайте персонажей по карте, чтобы задать их позиции. Координаты сохранятся автоматически при нажатии "Сохранить".</p>
+      <div class="admin-map-wrap">
+        <div class="admin-map" id="admin-map">
+          <img class="admin-map-image" src="images/map-background.png" alt="Карта отеля" />
+          <div id="admin-pins"></div>
+        </div>
+      </div>
+      <button class="secondary" id="reset-positions" type="button">Сбросить позиции по умолчанию</button>
+    </div>
+  </section>
+
+  <section class="admin-grid admin-panel" id="players-panel" hidden>
+    <div class="admin-section">
+      <div class="admin-header">
+        <div>
+          <h2>Игроки</h2>
+          <p class="fineprint">Прогресс берется из событий квеста. В демо-режиме виден игрок этого браузера.</p>
+        </div>
+        <div class="admin-actions">
+          <button class="secondary" id="reset-all-players" type="button">Сбросить всех</button>
+          <button class="secondary" id="refresh-players" type="button">Обновить</button>
+        </div>
+      </div>
+      <div id="players-content"></div>
+    </div>
+  </section>
+</main>
+
+<template id="character-template">
+  <article class="character-editor">
+    <div class="form-grid">
+      <label>Включен<select data-field="enabled"><option value="true">Да</option><option value="false">Нет</option></select></label>
+      <label>Активен<select data-field="active"><option value="true">Да</option><option value="false">Нет</option></select></label>
+      <label>ID<input data-field="id" /></label>
+      <label>Имя<input data-field="name" /></label>
+      <label>Место<input data-field="place" /></label>
+      <label>Цвет<input data-field="color" type="color" /></label>
+      <label>X<input data-field="x" inputmode="numeric" /></label>
+      <label>Y<input data-field="y" inputmode="numeric" /></label>
+      <label>Погода<select data-field="weatherRule"><option value="any">Любая</option><option value="sun">Солнце</option><option value="rain">Дождь</option><option value="cloudy">Облачно</option></select></label>
+      <label>Доступен с<input data-field="availableFrom" type="time" /></label>
+      <label>Доступен до<input data-field="availableTo" type="time" /></label>
+      <label>Баллы за находку<input data-field="foundPoints" inputmode="numeric" /></label>
+      <label>Бонусы 1/2/3<input data-field="attemptPoints" placeholder="30,20,10" /></label>
+    </div>
+    <label>Загадка<textarea data-field="riddle"></textarea></label>
+    <label>Ответы через запятую<textarea data-field="answers"></textarea></label>
+
+    <!-- Изображения: обычное и решённое -->
+    <div class="form-grid images">
+      <label>
+        URL изображения
+        <input data-field="image" placeholder="images/persona-1.png" />
+        <span class="hint-text">Картинка найденного персонажа</span>
+      </label>
+      <label>
+        URL изображения (решено)
+        <input data-field="imageSolved" placeholder="images/persona-1-solved.png" />
+        <span class="hint-text">Картинка после решения загадки (другая поза)</span>
+      </label>
+    </div>
+    <div class="form-grid images">
+      <label>
+        Загрузить изображение
+        <input type="file" data-field="imageFile" accept="image/*" />
+        <img class="image-preview" data-preview="image" src="" alt="превью" />
+      </label>
+      <label>
+        Загрузить изображение (решено)
+        <input type="file" data-field="imageSolvedFile" accept="image/*" />
+        <img class="image-preview" data-preview="imageSolved" src="" alt="превью" />
+      </label>
+    </div>
+
+    <div class="form-grid hint">
+      <label>
+        Тип подсказки
+        <select data-field="hintType">
+          <option value="text">Текст</option>
+          <option value="voice">Голос</option>
+        </select>
+      </label>
+      <label>
+        Текст подсказки (или URL аудио)
+        <input data-field="hintText" placeholder="Нажми на меня, я шепну..." />
+      </label>
+    </div>
+    <label>
+      Фраза, если персонаж уже найден
+      <input data-field="hintFoundText" placeholder="Ты уже меня нашёл!" />
+    </label>
+    <label>
+      Аудио-файл для голосовой подсказки (загрузите, если выбран тип "Голос")
+      <input type="file" data-field="hintAudio" accept="audio/*" />
+      <span data-preview="hintAudio"></span>
+    </label>
+  </article>
+</template>
+
+<script src="./config.js"></script>
+<script src="./admin.js"></script>
+</body>
+</html>

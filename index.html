@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Квест отеля</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+<main class="app" id="app">
+  <section class="screen screen-active" id="start-screen" aria-labelledby="start-title">
+    <div class="brand-row">
+      <div class="brand-mark">H</div>
+      <div>
+        <p class="eyebrow">Green Line Batumi</p>
+        <h1 id="start-title">Тайные хранители отеля</h1>
+      </div>
+    </div>
+
+    <div class="hero-scene" aria-hidden="true">
+      <div class="hotel-shape">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="hero-character"></div>
+    </div>
+
+    <form class="panel" id="registration-form">
+      <label>
+        Имя
+        <input id="guest-name" name="guestName" autocomplete="given-name" required minlength="2" placeholder="Анна" />
+      </label>
+      <label>
+        Номер комнаты
+        <input id="room-number" name="roomNumber" inputmode="numeric" list="room-options" required minlength="1" placeholder="204" />
+        <datalist id="room-options"></datalist>
+      </label>
+      <button class="primary" type="submit">Начать игру</button>
+      <p class="feedback feedback-error" id="registration-feedback" role="status"></p>
+      <p class="fineprint">Участие привязывается к этому устройству. Повторно начать игру с него нельзя.</p>
+    </form>
+  </section>
+
+  <section class="screen" id="quest-screen" aria-labelledby="quest-title">
+    <header class="topbar" id="topbar">
+      <div class="topbar-left">
+        <div class="brand-mark">H</div>
+        <div>
+          <p class="eyebrow">Green Line Batumi</p>
+          <h2 id="quest-title">Карта поиска</h2>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="topbar-chip" id="map-button" type="button" aria-label="Карта" hidden>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+            <line x1="8" y1="2" x2="8" y2="18"/>
+            <line x1="16" y1="6" x2="16" y2="22"/>
+          </svg>
+        </button>
+        <button class="topbar-chip is-weather" id="weather-button" type="button" aria-label="Погода">
+          <svg class="icon" id="weather-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <button class="topbar-chip" id="profile-button" type="button" aria-label="Профиль">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <section class="quest-view" id="map-view">
+      <div class="map-wrap">
+        <img class="map-image" src="images/map-background.png" alt="Карта отеля" />
+        <div class="map-pins-container" id="map-pins"></div>
+      </div>
+      <p class="scan-hint">Ищите QR-код в отмеченной зоне и сканируйте его камерой телефона.</p>
+    </section>
+
+    <section class="quest-view character-fullscreen" id="character-view" hidden>
+      <div class="character-hero" id="character-hero">
+        <img class="character-portrait" id="character-avatar" alt="" />
+      </div>
+      <div class="character-body" id="character-panel">
+        <div class="character-header">
+          <p class="eyebrow" id="character-place"></p>
+          <h2 id="character-name"></h2>
+          <span class="status-pill is-pending" id="status-pill">Ожидание</span>
+        </div>
+        <div class="attempts-bar" id="attempts-bar"></div>
+        <p class="riddle" id="riddle-text"></p>
+        <form id="answer-form" class="answer-form">
+          <input id="answer-input" required autocomplete="off" placeholder="Ваш ответ" />
+          <button class="primary" type="submit">Ответить</button>
+        </form>
+        <p class="feedback" id="feedback" role="status"></p>
+      </div>
+    </section>
+
+    <section class="quest-view" id="profile-view" hidden>
+      <section class="profile-panel">
+        <div class="profile-hero">
+          <div class="profile-avatar-wrap">
+            <div class="profile-avatar-ring"></div>
+            <svg class="profile-avatar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div class="profile-info">
+            <h2 id="profile-name">Игрок</h2>
+            <p id="profile-room">Комната</p>
+          </div>
+        </div>
+        <div class="score-strip">
+          <div class="score-cell">
+            <div class="score-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <strong id="score-value">0</strong>
+            <span>баллов</span>
+          </div>
+          <div class="score-cell">
+            <div class="score-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <strong id="found-value">0/0</strong>
+            <span>персонажей</span>
+          </div>
+          <div class="score-cell">
+            <div class="score-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+            </div>
+            <strong id="progress-value">0%</strong>
+            <span>прогресс</span>
+          </div>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progress-bar"></div>
+        </div>
+        <section class="collection">
+          <h2>Коллекция</h2>
+          <div class="collection-grid" id="collection-grid"></div>
+        </section>
+      </section>
+    </section>
+  </section>
+
+  <section class="screen" id="finish-screen" aria-labelledby="finish-title">
+    <div class="finish-badge">✓</div>
+    <p class="eyebrow">Квест завершен</p>
+    <h1 id="finish-title">Все хранители собраны</h1>
+    <p class="finish-copy" id="finish-copy"></p>
+    <div class="final-score">
+      <strong id="final-score">0</strong>
+      <span>итоговых баллов</span>
+    </div>
+    <canvas class="result-card" id="result-card" width="900" height="1200" aria-label="Карточка результата"></canvas>
+    <button class="secondary" id="save-result-button" type="button">Сохранить результат</button>
+  </section>
+</main>
+
+<script src="./config.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
