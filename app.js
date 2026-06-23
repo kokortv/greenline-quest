@@ -428,7 +428,32 @@
 
     document.body.appendChild(bubble);
 
+    /* Clamp bubble position to stay within viewport */
     requestAnimationFrame(() => {
+      const bRect = bubble.getBoundingClientRect();
+      const margin = 8;
+      let shiftX = 0;
+
+      /* Horizontal: if bubble overflows left or right, shift it */
+      if (bRect.left < margin) {
+        shiftX = margin - bRect.left;
+      } else if (bRect.right > window.innerWidth - margin) {
+        shiftX = window.innerWidth - margin - bRect.right;
+      }
+      if (shiftX) {
+        bubble.style.left = (x + shiftX) + "px";
+        /* Also shift the arrow opposite to keep it pointing at the pin */
+        const arrow = bubble.querySelector(".hint-bubble-arrow");
+        if (arrow) arrow.style.marginLeft = (-shiftX) + "px";
+      }
+
+      /* Vertical: if bubble overflows top, show below the pin instead */
+      if (bRect.top < margin) {
+        const newY = rect.bottom + 8;
+        bubble.style.top = newY + "px";
+        bubble.classList.add("is-below");
+      }
+
       requestAnimationFrame(() => {
         bubble.classList.add("is-visible");
       });

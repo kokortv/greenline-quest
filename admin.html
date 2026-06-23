@@ -462,10 +462,27 @@
       <input type="file" data-field="hintAudio" accept="audio/*" />
       <span data-preview="hintAudio"></span>
     </label>
+
+    <!-- QR-код для персонажа -->
+    <div class="qr-section" style="display:grid;gap:10px;padding:14px;border:1px solid var(--line);border-radius:8px;background:#fff;">
+      <strong style="font-size:0.85rem;">QR-код персонажа</strong>
+      <div class="qr-url-row" style="display:flex;gap:8px;align-items:center;">
+        <code class="qr-url" style="flex:1;padding:8px 10px;border-radius:6px;background:#eef2f3;color:#2364aa;font-size:0.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;" title="Нажмите чтобы скопировать"></code>
+        <button class="qr-copy-btn" type="button" style="min-height:36px;padding:0 12px;border:1px solid var(--line);border-radius:6px;background:#fffdf7;font-weight:700;font-size:0.8rem;cursor:pointer;">Копировать</button>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <canvas class="qr-canvas" width="160" height="160" style="border:1px solid var(--line);border-radius:6px;background:#fff;"></canvas>
+        <div style="display:grid;gap:6px;">
+          <button class="qr-download-btn" type="button" style="min-height:36px;padding:0 12px;border:1px solid var(--line);border-radius:6px;background:#fffdf7;font-weight:700;font-size:0.8rem;cursor:pointer;">Скачать PNG</button>
+          <button class="qr-open-btn" type="button" style="min-height:36px;padding:0 12px;border:1px solid var(--line);border-radius:6px;background:#fffdf7;font-weight:700;font-size:0.8rem;cursor:pointer;">Открыть</button>
+        </div>
+      </div>
+    </div>
   </article>
 </template>
 
 <script src="./config.js"></script>
+<script src="./qr.js"></script>
 <script src="./admin.js"></script>
 </body>
 </html>

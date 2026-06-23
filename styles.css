@@ -1223,6 +1223,26 @@ input:disabled {
   transition: all 0.25s cubic-bezier(0.4, 0, 1, 1);
 }
 
+/* When bubble is below the pin (overflows top) */
+.hint-bubble.is-below {
+  transform: translate(-50%, 0) translateY(8px) scale(0.85);
+}
+
+.hint-bubble.is-below.is-visible {
+  transform: translate(-50%, 0) translateY(0) scale(1);
+}
+
+.hint-bubble.is-below.is-leaving {
+  transform: translate(-50%, 0) translateY(6px) scale(0.92);
+}
+
+.hint-bubble.is-below .hint-bubble-arrow {
+  border-top: none;
+  border-bottom: 8px solid var(--bubble-color, #2364aa);
+  margin: 0 auto -2px;
+  order: -1;
+}
+
 .hint-bubble-content {
   background: linear-gradient(135deg, var(--bubble-color, #2364aa), color-mix(in srgb, var(--bubble-color, #2364aa) 80%, #000));
   color: #fff;

@@ -106,6 +106,80 @@
         });
       });
 
+      /* QR code section */
+      const qrUrl = node.querySelector(".qr-url");
+      const qrCanvas = node.querySelector(".qr-canvas");
+      const qrCopyBtn = node.querySelector(".qr-copy-btn");
+      const qrDownloadBtn = node.querySelector(".qr-download-btn");
+      const qrOpenBtn = node.querySelector(".qr-open-btn");
+
+      if (qrUrl && qrCanvas) {
+        const baseUrl = window.location.href.replace(/admin\.html.*$/, "");
+        const href = `${baseUrl}index.html?spot=${encodeURIComponent(character.id)}`;
+        const fullUrl = href;
+
+        qrUrl.textContent = fullUrl;
+        qrUrl.title = fullUrl;
+
+        /* Generate QR */
+        try {
+          QRCodeDraw.drawToCanvas(fullUrl, qrCanvas, 4);
+        } catch (e) {
+          /* Fallback: show text if QR fails */
+          const ctx = qrCanvas.getContext("2d");
+          ctx.fillStyle = "#eef2f3";
+          ctx.fillRect(0, 0, 160, 160);
+          ctx.fillStyle = "#65717b";
+          ctx.font = "12px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("QR error", 80, 85);
+        }
+
+        /* Copy URL */
+        const copyUrl = () => {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(fullUrl).then(() => {
+              qrCopyBtn.textContent = "Скопировано!";
+              setTimeout(() => { qrCopyBtn.textContent = "Копировать"; }, 1500);
+            });
+          } else {
+            const ta = document.createElement("textarea");
+            ta.value = fullUrl;
+            ta.style.cssText = "position:fixed;left:-9999px";
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            document.body.removeChild(ta);
+            qrCopyBtn.textContent = "Скопировано!";
+            setTimeout(() => { qrCopyBtn.textContent = "Копировать"; }, 1500);
+          }
+        };
+        qrUrl.addEventListener("click", copyUrl);
+        qrCopyBtn.addEventListener("click", copyUrl);
+
+        /* Download QR as PNG */
+        qrDownloadBtn.addEventListener("click", () => {
+          /* Re-draw at higher resolution for download */
+          const dlCanvas = document.createElement("canvas");
+          QRCodeDraw.drawToCanvas(fullUrl, dlCanvas, 10);
+          const link = document.createElement("a");
+          link.download = `qr-${character.id}.png`;
+          link.href = dlCanvas.toDataURL("image/png");
+          link.click();
+        });
+
+        /* Open QR in new tab */
+        qrOpenBtn.addEventListener("click", () => {
+          const w = window.open("", "_blank");
+          if (w) {
+            const dlCanvas = document.createElement("canvas");
+            QRCodeDraw.drawToCanvas(fullUrl, dlCanvas, 10);
+            w.document.write(`<!DOCTYPE html><html><head><title>QR: ${character.name}</title><style>body{display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:#f5f1e8;font-family:system-ui;}img{max-width:80vw;max-height:80vh;border:1px solid #d9d0c0;border-radius:8px;background:#fff;}h2{color:#192027;}</style></head><body><div style="text-align:center"><h2>${character.name} — ${character.place}</h2><img src="${dlCanvas.toDataURL("image/png")}" /><p style="color:#65717b;font-size:0.85rem;word-break:break-all;">${fullUrl}</p></div></body></html>`);
+            w.document.close();
+          }
+        });
+      }
+
       list.appendChild(node);
     });
   }
