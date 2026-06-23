@@ -348,7 +348,9 @@
       solved,
       total: characters.length,
       progress: characters.length ? Math.round((found / characters.length) * 100) : 100,
-      status: participant.status === "completed" || completed === characters.length ? "completed" : "active"
+      status: participant.status === "completed" || completed === characters.length ? "completed" : "active",
+      startedAt: participant.startedAt || "",
+      completedAt: participant.completedAt || ""
     };
   }
 
@@ -469,6 +471,8 @@
             <th>Решено</th>
             <th>Прогресс</th>
             <th>Статус</th>
+            <th>Регистрация</th>
+            <th>Завершение</th>
             <th>Действия</th>
           </tr>
         </thead>
@@ -484,6 +488,8 @@
               <td>${player.solved || 0}/${player.total || 0}</td>
               <td>${player.progress || 0}%</td>
               <td>${player.status === "completed" ? "Завершен" : "В игре"}</td>
+              <td>${formatDate(player.startedAt)}</td>
+              <td>${formatDate(player.completedAt)}</td>
               <td>
                 <div class="actions-cell">
                   <button class="reset-btn" data-action="reset" data-id="${player.id}">Сбросить</button>
@@ -514,6 +520,22 @@
       .replaceAll('"', "&quot;");
   }
 
+  function formatDate(isoString) {
+    if (!isoString) return "—";
+    try {
+      const d = new Date(isoString);
+      if (isNaN(d.getTime())) return "—";
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const year = d.getFullYear();
+      const hours = String(d.getHours()).padStart(2, "0");
+      const minutes = String(d.getMinutes()).padStart(2, "0");
+      return `${day}.${month}.${year} ${hours}:${minutes}`;
+    } catch (e) {
+      return "—";
+    }
+  }
+
   function addCharacter() {
     config.characters.push({
       id: `new-${Date.now()}`,
@@ -535,7 +557,8 @@
       hintType: "text",
       hintText: "Нажми на меня, я подскажу!",
       hintFoundText: "Ты уже нашёл меня!",
-      hintAudio: ""
+      hintAudio: "",
+      unavailableHint: ""
     });
     renderCharacters();
     renderAdminMap();

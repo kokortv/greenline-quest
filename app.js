@@ -117,6 +117,7 @@
         hintText: "Нажми на меня, я подскажу!",
         hintFoundText: "Ты уже нашёл меня!",
         hintAudio: "",
+        unavailableHint: "",
         ...character
       }))
     };
@@ -519,7 +520,8 @@
     const available = isCharacterAvailable(character);
 
     if (character.enabled === false || !available) {
-      showBubble("⏳ Персонаж недоступен", pinElement, "#b94d3e");
+      const hint = character.unavailableHint || "Персонаж недоступен";
+      showBubble(hint, pinElement, "#65717b");
       return;
     }
 
@@ -797,25 +799,28 @@
 
     /* Disabled / unavailable characters */
     if (character.enabled === false) {
-      byId("riddle-text").textContent = "Этот персонаж временно не участвует в квесте.";
+      const hint = character.unavailableHint || "Этот персонаж временно не участвует в квесте.";
+      byId("riddle-text").textContent = hint;
       answerForm.classList.add("is-hidden");
-      feedback.textContent = "Обратитесь к администратору.";
-      feedback.className = "feedback feedback-error";
+      feedback.textContent = "";
+      feedback.className = "feedback";
       return;
     }
 
     if (!isCharacterAvailable(character)) {
-      let hint = "Этот персонаж сейчас недоступен.";
-      if (character.weatherRule !== "any" && character.weatherRule !== config.settings.currentWeather) {
-        hint += ` Он появляется только в ${weatherLabels[character.weatherRule] || "определённую погоду"}.`;
-      }
-      if (character.availableFrom && character.availableTo) {
-        hint += ` Доступен с ${character.availableFrom} до ${character.availableTo}.`;
+      let hint = character.unavailableHint || "Этот персонаж сейчас недоступен.";
+      if (!character.unavailableHint) {
+        if (character.weatherRule !== "any" && character.weatherRule !== config.settings.currentWeather) {
+          hint += ` Он появляется только в ${weatherLabels[character.weatherRule] || "определённую погоду"}.`;
+        }
+        if (character.availableFrom && character.availableTo) {
+          hint += ` Доступен с ${character.availableFrom} до ${character.availableTo}.`;
+        }
       }
       byId("riddle-text").textContent = hint;
       answerForm.classList.add("is-hidden");
-      feedback.textContent = "Попробуйте позже или измените погоду в настройках.";
-      feedback.className = "feedback feedback-error";
+      feedback.textContent = "";
+      feedback.className = "feedback";
       return;
     }
 

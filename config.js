@@ -107,7 +107,8 @@ window.HOTEL_QUEST_CONFIG = {
       hintType: "text",
       hintText: "Я у бассейна, приходи в солнечный день!",
       hintFoundText: "Ты меня уже нашёл!",
-      hintAudio: ""
+      hintAudio: "",
+      unavailableHint: "Я появляюсь только в солнечную погоду. Приходи, когда будет солнце!"
     },
     {
       id: "garden",
@@ -130,7 +131,8 @@ window.HOTEL_QUEST_CONFIG = {
       hintType: "text",
       hintText: "Я в саду, иди под дождём!",
       hintFoundText: "Ты меня уже нашёл!",
-      hintAudio: ""
+      hintAudio: "",
+      unavailableHint: "Я появляюсь только в дождливую погоду. Приходи, когда пойдёт дождь!"
     },
     {
       id: "stairs",

@@ -181,8 +181,18 @@ function ensurePlayersSheet() {
   var sheet = ss.getSheetByName("players");
   if (!sheet) {
     sheet = ss.insertSheet("players");
-    sheet.appendRow(["id", "name", "room", "score", "found", "solved", "total", "progress", "status", "lastActivity"]);
-    sheet.getRange(1, 1, 1, 10).setFontWeight("bold");
+    sheet.appendRow(["id", "name", "room", "score", "found", "solved", "total", "progress", "status", "lastActivity", "startedAt", "completedAt"]);
+    sheet.getRange(1, 1, 1, 12).setFontWeight("bold");
+  } else {
+    // Migrate: add startedAt and completedAt columns if missing
+    var header = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    if (header.length < 12) {
+      var needed = 12 - header.length;
+      for (var c = 0; c < needed; c++) {
+        sheet.getRange(1, header.length + c + 1).setValue(["startedAt", "completedAt"][c] || "");
+      }
+      sheet.getRange(1, 1, 1, 12).setFontWeight("bold");
+    }
   }
   return sheet;
 }
@@ -214,7 +224,9 @@ function updatePlayer(participant) {
     total,
     progress + "%",
     status,
-    new Date().toISOString()
+    new Date().toISOString(),
+    participant.startedAt || "",
+    participant.completedAt || ""
   ];
 
   // Ищем существующую строку
@@ -227,7 +239,7 @@ function updatePlayer(participant) {
   }
 
   if (rowIndex > 0) {
-    sheet.getRange(rowIndex, 1, 1, 10).setValues([rowData]);
+    sheet.getRange(rowIndex, 1, 1, 12).setValues([rowData]);
   } else {
     sheet.appendRow(rowData);
   }
@@ -248,7 +260,9 @@ function getPlayersList() {
       solved: data[i][5],
       total: data[i][6],
       progress: parseInt(String(data[i][7]).replace("%", "")) || 0,
-      status: data[i][8]
+      status: data[i][8],
+      startedAt: data[i][10] || "",
+      completedAt: data[i][11] || ""
     });
   }
   return players;
@@ -283,9 +297,11 @@ function resetPlayerRow(playerId) {
         data[i][6],   // total
         "0%",         // progress
         "active",     // status
-        new Date().toISOString()  // lastActivity
+        new Date().toISOString(),  // lastActivity
+        data[i][10] || "",  // startedAt — keep original
+        ""            // completedAt — clear
       ];
-      sheet.getRange(i + 1, 1, 1, 10).setValues([rowData]);
+      sheet.getRange(i + 1, 1, 1, 12).setValues([rowData]);
     }
   }
 }
