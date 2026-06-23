@@ -157,11 +157,37 @@
         qrUrl.addEventListener("click", copyUrl);
         qrCopyBtn.addEventListener("click", copyUrl);
 
+        /* Generate high-res QR canvas (returns Promise) */
+        const makeHiResQR = () => {
+          return new Promise((resolve) => {
+            const dlCanvas = document.createElement("canvas");
+            try {
+              QRCodeDraw.drawToCanvas(fullUrl, dlCanvas, 10);
+              /* Check if canvas actually has content (not 0x0) */
+              if (dlCanvas.width > 0 && dlCanvas.height > 0) {
+                resolve(dlCanvas);
+                return;
+              }
+            } catch (e) { /* fallback below */ }
+
+            /* API fallback for long URLs */
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+              dlCanvas.width = img.naturalWidth;
+              dlCanvas.height = img.naturalHeight;
+              dlCanvas.getContext("2d").drawImage(img, 0, 0);
+              resolve(dlCanvas);
+            };
+            img.onerror = () => resolve(null);
+            img.src = "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=" + encodeURIComponent(fullUrl);
+          });
+        };
+
         /* Download QR as PNG */
-        qrDownloadBtn.addEventListener("click", () => {
-          /* Re-draw at higher resolution for download */
-          const dlCanvas = document.createElement("canvas");
-          QRCodeDraw.drawToCanvas(fullUrl, dlCanvas, 10);
+        qrDownloadBtn.addEventListener("click", async () => {
+          const dlCanvas = await makeHiResQR();
+          if (!dlCanvas) return;
           const link = document.createElement("a");
           link.download = `qr-${character.id}.png`;
           link.href = dlCanvas.toDataURL("image/png");
@@ -169,11 +195,11 @@
         });
 
         /* Open QR in new tab */
-        qrOpenBtn.addEventListener("click", () => {
+        qrOpenBtn.addEventListener("click", async () => {
+          const dlCanvas = await makeHiResQR();
+          if (!dlCanvas) return;
           const w = window.open("", "_blank");
           if (w) {
-            const dlCanvas = document.createElement("canvas");
-            QRCodeDraw.drawToCanvas(fullUrl, dlCanvas, 10);
             w.document.write(`<!DOCTYPE html><html><head><title>QR: ${character.name}</title><style>body{display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:#f5f1e8;font-family:system-ui;}img{max-width:80vw;max-height:80vh;border:1px solid #d9d0c0;border-radius:8px;background:#fff;}h2{color:#192027;}</style></head><body><div style="text-align:center"><h2>${character.name} — ${character.place}</h2><img src="${dlCanvas.toDataURL("image/png")}" /><p style="color:#65717b;font-size:0.85rem;word-break:break-all;">${fullUrl}</p></div></body></html>`);
             w.document.close();
           }

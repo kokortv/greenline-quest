@@ -183,23 +183,59 @@
    */
   function drawToCanvas(text, canvas, cellSize) {
     cellSize = cellSize || 4;
-    var qr = new QR(0, "M");
-    qr.addData(text);
-    qr.make();
-    var count = qr.getModuleCount();
-    var size = count * cellSize;
-    canvas.width = size;
-    canvas.height = size;
-    var ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(0, 0, size, size);
-    ctx.fillStyle = "#192027";
-    for (var row = 0; row < count; row++) {
-      for (var col = 0; col < count; col++) {
-        if (qr.isDark(row, col)) {
-          ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+    var qr = null;
+    /* Auto-detect minimum version (1-10 supported by RS table) */
+    for (var type = 1; type <= 10; type++) {
+      try {
+        qr = new QR(type, "M");
+        qr.addData(text);
+        qr.make();
+        break;
+      } catch (e) {
+        qr = null;
+        continue;
+      }
+    }
+
+    if (qr) {
+      /* Draw locally generated QR */
+      var count = qr.getModuleCount();
+      var size = count * cellSize;
+      canvas.width = size;
+      canvas.height = size;
+      var ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = "#192027";
+      for (var row = 0; row < count; row++) {
+        for (var col = 0; col < count; col++) {
+          if (qr.isDark(row, col)) {
+            ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+          }
         }
       }
+    } else {
+      /* Fallback: use external API for long URLs */
+      var img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = function() {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+      };
+      img.onerror = function() {
+        var ctx = canvas.getContext("2d");
+        canvas.width = 160;
+        canvas.height = 160;
+        ctx.fillStyle = "#eef2f3";
+        ctx.fillRect(0, 0, 160, 160);
+        ctx.fillStyle = "#65717b";
+        ctx.font = "11px system-ui";
+        ctx.textAlign = "center";
+        ctx.fillText("QR error", 80, 85);
+      };
+      img.src = "https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=" + encodeURIComponent(text);
     }
   }
 
