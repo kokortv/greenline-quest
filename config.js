@@ -43,7 +43,6 @@ window.HOTEL_QUEST_CONFIG = {
     {
       id: "lobby",
       name: "Люмен",
-      place: "Лобби",
       color: "#2364aa",
       x: 50,
       y: 20,
@@ -66,7 +65,6 @@ window.HOTEL_QUEST_CONFIG = {
     {
       id: "cafe",
       name: "Мира",
-      place: "Кафе",
       color: "#d1663f",
       x: 26,
       y: 43,
@@ -89,7 +87,6 @@ window.HOTEL_QUEST_CONFIG = {
     {
       id: "pool",
       name: "Ори",
-      place: "Бассейн",
       color: "#2a8c82",
       x: 74,
       y: 43,
@@ -113,7 +110,6 @@ window.HOTEL_QUEST_CONFIG = {
     {
       id: "garden",
       name: "Флора",
-      place: "Сад",
       color: "#6f8f3d",
       x: 28,
       y: 76,
@@ -137,7 +133,6 @@ window.HOTEL_QUEST_CONFIG = {
     {
       id: "stairs",
       name: "Степ",
-      place: "Лестница",
       color: "#7a5cba",
       x: 72,
       y: 76,

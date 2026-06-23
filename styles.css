@@ -477,7 +477,7 @@ input:disabled {
 /* Not found — gray and semi-transparent */
 .map-pin:not(.is-found) img {
   filter: grayscale(1);
-  opacity: 0.5;
+  opacity: 0.8;
 }
 
 /* Found but not solved — color image */
@@ -820,20 +820,16 @@ input:disabled {
 }
 
 .character-fullscreen.is-unavailable .character-portrait {
-  filter: grayscale(1) opacity(0.5);
+  filter: grayscale(1) opacity(0.8);
   animation: none;
 }
 
 .character-fullscreen.is-unavailable .character-portrait:hover {
   transform: none;
-  filter: grayscale(1) opacity(0.5);
+  filter: grayscale(1) opacity(0.8);
 }
 
 .character-fullscreen.is-unavailable .character-name {
-  color: var(--muted);
-}
-
-.character-fullscreen.is-unavailable .character-place {
   color: var(--muted);
 }
 

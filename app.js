@@ -507,7 +507,7 @@
       if (imageUrl) {
         const img = document.createElement("img");
         img.src = imageUrl;
-        img.alt = character.name;
+        img.alt = found ? character.name : "???";
         img.onerror = function () {
           this.style.display = "none";
           const fallback = document.createElement("div");
@@ -532,7 +532,7 @@
 
       const label = document.createElement("div");
       label.className = "pin-label";
-      label.textContent = found ? character.name : (available ? character.name : `${character.name} ⏱`);
+      label.textContent = found ? character.name : "???";
       pin.appendChild(label);
 
       pin.addEventListener("click", (e) => {
@@ -684,7 +684,6 @@
       card.innerHTML = `
         ${imgSrc ? `<img class="card-portrait" src="${imgSrc}" alt="${found ? character.name : ''}" onerror="this.style.display='none'" />` : '<div class="card-portrait" style="background:var(--line);border-radius:var(--radius-sm);"></div>'}
         <strong>${found ? character.name : "???"}</strong>
-        <span>${character.place}</span>
         <small>${solved ? "Решено" : found ? "Открыт" : "Не найден"}</small>
       `;
 
@@ -813,7 +812,7 @@
 
     if (imgSrc) {
       avatar.src = imgSrc;
-      avatar.alt = character.name;
+      avatar.alt = spot.found ? character.name : "???";
       avatar.style.display = "";
     } else {
       avatar.src = "";
@@ -833,8 +832,7 @@
       linear-gradient(180deg, #dbe9ef 0%, #eef2f0 60%, var(--bg) 100%)
     `;
 
-    byId("character-place").textContent = character.place;
-    byId("character-name").textContent = character.name;
+    byId("character-name").textContent = spot.found ? character.name : "???";
 
     const attemptsLeft = Math.max(0, config.settings.maxAttempts - spot.attempts);
 
@@ -842,8 +840,9 @@
     renderAttemptsDots(spot, config.settings.maxAttempts);
     renderStatusPill(spot, character);
 
-    /* Disabled / unavailable characters */
+    /* Disabled / unavailable characters — hide name */
     if (character.enabled === false) {
+      byId("character-name").textContent = "???";
       const hint = character.unavailableHint || "Этот персонаж временно не участвует в квесте.";
       byId("riddle-text").textContent = hint;
       answerForm.classList.add("is-hidden");
@@ -859,6 +858,7 @@
     }
 
     if (!isCharacterAvailable(character)) {
+      byId("character-name").textContent = "???";
       let hint = character.unavailableHint || "Этот персонаж сейчас недоступен.";
       if (!character.unavailableHint) {
         if (character.weatherRule !== "any" && character.weatherRule !== config.settings.currentWeather) {
@@ -1185,10 +1185,14 @@
     setScreen("start");
   }
 
-  /* Hide loading overlay once data is ready */
+  /* Hide loading overlay — wait at least 3 seconds so it doesn't flash */
   const loadingOverlay = byId("loading-overlay");
   if (loadingOverlay) {
-    loadingOverlay.style.opacity = "0";
-    setTimeout(() => { loadingOverlay.style.display = "none"; }, 300);
+    const minDisplayUntil = Date.now() + 3000;
+    const delay = Math.max(0, minDisplayUntil - Date.now());
+    setTimeout(() => {
+      loadingOverlay.style.opacity = "0";
+      setTimeout(() => { loadingOverlay.style.display = "none"; }, 300);
+    }, delay);
   }
 })();
