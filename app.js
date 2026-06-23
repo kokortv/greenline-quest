@@ -799,23 +799,35 @@
     const finishText = allSolved ? config.settings.finishSuccess : config.settings.finishSupport;
     wrapText(ctx, finishText, 40, 135, W - 80, 20);
 
-    /* Trophy */
+    /* Trophy + Score (trophy left of number, same height) */
+    const scoreStr = String(participant.score);
+    ctx.font = "900 72px Inter, system-ui, sans-serif";
+    const scoreWidth = ctx.measureText(scoreStr).width;
     ctx.font = "64px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("\uD83C\uDFC6", W / 2, 240);
+    const trophyWidth = 64;
+    const totalWidth = trophyWidth + 12 + scoreWidth;
+    const startX = (W - totalWidth) / 2;
 
-    /* Score */
+    /* Trophy emoji */
+    ctx.font = "64px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("\uD83C\uDFC6", startX, 270);
+
+    /* Score number */
     ctx.fillStyle = "#192027";
     ctx.font = "900 72px Inter, system-ui, sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText(String(participant.score), W / 2, 320);
+    ctx.textAlign = "left";
+    ctx.fillText(scoreStr, startX + trophyWidth + 12, 280);
+
+    /* "БАЛЛОВ" label */
     ctx.fillStyle = "#65717b";
     ctx.font = "800 16px Inter, system-ui, sans-serif";
-    ctx.fillText("БАЛЛОВ", W / 2, 350);
+    ctx.textAlign = "center";
+    ctx.fillText("БАЛЛОВ", W / 2, 330);
 
     /* Divider */
     ctx.fillStyle = "#d9d0c0";
-    ctx.fillRect(40, 360, W - 80, 1);
+    ctx.fillRect(40, 370, W - 80, 1);
 
     /* Stats */
     ctx.textAlign = "left";
@@ -830,7 +842,7 @@
     ];
 
     stats.forEach((s, i) => {
-      const y = 410 + i * 70;
+      const y = 420 + i * 70;
       ctx.fillStyle = "#65717b";
       ctx.font = "800 11px Inter, system-ui, sans-serif";
       ctx.fillText(s.label, 40, y);

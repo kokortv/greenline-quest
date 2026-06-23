@@ -1118,8 +1118,8 @@ input:disabled {
 
 .finish-score-block {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  gap: 12px;
   padding: 24px;
   border-radius: var(--radius);
   background: linear-gradient(135deg, #192027 0%, #2a3444 100%);
@@ -1135,10 +1135,24 @@ input:disabled {
 }
 
 .finish-trophy {
-  font-size: 3rem;
+  font-size: 3.5rem;
   line-height: 1;
-  display: block;
-  margin-bottom: 4px;
+  flex-shrink: 0;
+}
+
+.finish-score-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.finish-score-right span {
+  color: rgba(255, 253, 247, 0.6);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .finish-prizes {
@@ -1152,13 +1166,6 @@ input:disabled {
   line-height: 1.45;
 }
 
-.finish-score-block span {
-  color: rgba(255, 253, 247, 0.6);
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
 
 @keyframes badgePop {
   from {
