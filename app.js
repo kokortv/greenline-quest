@@ -754,6 +754,111 @@
     byId("finish-room").textContent = participant.room;
     byId("finish-found").textContent = `${progress.found}/${progress.characters.length}`;
     byId("finish-progress").textContent = `${progress.percent}%`;
+    drawResultCard(participant, progress);
+  }
+
+  function drawResultCard(participant, progress) {
+    const canvas = byId("result-card");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const W = 600, H = 800;
+    canvas.width = W;
+    canvas.height = H;
+
+    /* Background */
+    ctx.fillStyle = "#f5f1e8";
+    ctx.fillRect(0, 0, W, H);
+
+    /* Top dark header */
+    const grad = ctx.createLinearGradient(0, 0, W, 180);
+    grad.addColorStop(0, "#192027");
+    grad.addColorStop(1, "#2a3444");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, 180);
+
+    /* Hotel name */
+    ctx.fillStyle = "#fffdf7";
+    ctx.font = "800 14px Inter, system-ui, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("GREEN LINE BATUMI", 40, 50);
+
+    /* Finish title */
+    ctx.font = "800 32px Inter, system-ui, sans-serif";
+    ctx.fillText(config.settings.finishTitle, 40, 100);
+
+    /* Finish text */
+    ctx.fillStyle = "rgba(255,253,247,0.6)";
+    ctx.font = "500 15px Inter, system-ui, sans-serif";
+    const allSolved = progress.solved === progress.characters.length;
+    const finishText = allSolved ? config.settings.finishSuccess : config.settings.finishSupport;
+    wrapText(ctx, finishText, 40, 135, W - 80, 20);
+
+    /* Score */
+    ctx.fillStyle = "#192027";
+    ctx.font = "900 72px Inter, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(String(participant.score), W / 2, 290);
+    ctx.fillStyle = "#65717b";
+    ctx.font = "800 16px Inter, system-ui, sans-serif";
+    ctx.fillText("БАЛЛОВ", W / 2, 320);
+
+    /* Divider */
+    ctx.fillStyle = "#d9d0c0";
+    ctx.fillRect(40, 360, W - 80, 1);
+
+    /* Stats */
+    ctx.textAlign = "left";
+    ctx.font = "700 14px Inter, system-ui, sans-serif";
+    ctx.fillStyle = "#65717b";
+
+    const stats = [
+      { label: "ИМЯ", value: participant.name },
+      { label: "КОМНАТА", value: participant.room },
+      { label: "ПЕРСОНАЖИ", value: `${progress.found} / ${progress.characters.length}` },
+      { label: "ПРОГРЕСС", value: `${progress.percent}%` }
+    ];
+
+    stats.forEach((s, i) => {
+      const y = 410 + i * 70;
+      ctx.fillStyle = "#65717b";
+      ctx.font = "800 11px Inter, system-ui, sans-serif";
+      ctx.fillText(s.label, 40, y);
+      ctx.fillStyle = "#192027";
+      ctx.font = "700 22px Inter, system-ui, sans-serif";
+      ctx.fillText(s.value, 40, y + 28);
+    });
+
+    /* Progress bar */
+    ctx.fillStyle = "#e8eef0";
+    ctx.fillRect(40, 700, W - 80, 12);
+    const barGrad = ctx.createLinearGradient(40, 0, 40 + (W - 80) * progress.percent / 100, 0);
+    barGrad.addColorStop(0, "#2364aa");
+    barGrad.addColorStop(1, "#1f7a5b");
+    ctx.fillStyle = barGrad;
+    ctx.fillRect(40, 700, Math.max(12, (W - 80) * progress.percent / 100), 12);
+
+    /* Footer */
+    ctx.fillStyle = "#65717b";
+    ctx.font = "500 13px Inter, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Спасибо за игру!", W / 2, 760);
+  }
+
+  function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+    const words = text.split(" ");
+    let line = "";
+    let curY = y;
+    for (const word of words) {
+      const test = line + word + " ";
+      if (ctx.measureText(test).width > maxWidth && line) {
+        ctx.fillText(line.trim(), x, curY);
+        line = word + " ";
+        curY += lineHeight;
+      } else {
+        line = test;
+      }
+    }
+    if (line.trim()) ctx.fillText(line.trim(), x, curY);
   }
 
   function returnToMap() {
@@ -829,28 +934,12 @@
     showWeatherToast(labels[weather] || "Погода", colors[weather] || "#2364aa");
   });
   byId("save-result-button").addEventListener("click", () => {
-    const participant = getParticipant();
-    if (!participant) return;
-    const progress = getProgress(participant);
-    const allSolved = progress.solved === progress.characters.length;
-    const text = [
-      config.hotelName,
-      config.settings.finishTitle,
-      "",
-      allSolved ? config.settings.finishSuccess : config.settings.finishSupport,
-      "",
-      `${participant.score} баллов`,
-      `Игрок: ${participant.name}`,
-      `Комната: ${participant.room}`,
-      `Персонажи: ${progress.found}/${progress.characters.length}`,
-      `Прогресс: ${progress.percent}%`
-    ].join("\n");
-    const blob = new Blob([text], { type: "text/plain" });
+    const canvas = byId("result-card");
+    if (!canvas) return;
     const link = document.createElement("a");
-    link.download = "hotel-quest-result.txt";
-    link.href = URL.createObjectURL(blob);
+    link.download = "hotel-quest-result.png";
+    link.href = canvas.toDataURL("image/png");
     link.click();
-    URL.revokeObjectURL(link.href);
   });
 
   populateRoomOptions();

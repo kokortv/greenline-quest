@@ -122,10 +122,8 @@ h2 {
 .hero-scene {
   position: relative;
   margin: 24px 0 18px;
-  border: 1px solid var(--line);
   border-radius: var(--radius);
   overflow: hidden;
-  background: #dbe9ef;
   box-shadow: var(--shadow-lg);
 }
 
