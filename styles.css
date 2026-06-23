@@ -606,12 +606,17 @@ input:disabled {
 .scan-hint {
   margin: -2px 0 14px;
   padding: 12px 14px;
-  border: 1px solid var(--line);
+  border: 1px solid #f0d98a;
   border-radius: var(--radius-sm);
-  background: var(--panel);
-  color: var(--muted);
-  font-size: 0.9rem;
-  line-height: 1.35;
+  background: #fef9ee;
+  color: #8a6d00;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.scan-hint:empty {
+  display: none;
 }
 
 /* === Character Fullscreen === */

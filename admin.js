@@ -19,8 +19,8 @@
     }
     urlParams.delete("reset");
     const cleanUrl = urlParams.toString()
-      ? window.location.pathname + "?" + urlParams.toString()
-      : window.location.pathname;
+      ? window.location.pathname + "?" + urlParams.toString() + "&_t=" + Date.now()
+      : window.location.pathname + "?_t=" + Date.now();
     window.location.replace(cleanUrl);
     return;
   }
@@ -28,9 +28,21 @@
   const fallbackConfig = window.HOTEL_QUEST_CONFIG;
   const draft = loadConfig();
 
-  /* Ensure admin always has at least as many characters as fallback */
-  if (draft.characters && draft.characters.length < (fallbackConfig.characters || []).length) {
-    draft.characters = fallbackConfig.characters;
+  /* Merge: always preserve all fallback characters, overlay draft by id */
+  if (draft.characters && draft.characters.length > 0) {
+    const fallbackChars = fallbackConfig.characters || [];
+    const draftMap = new Map(draft.characters.map(ch => [ch.id, ch]));
+    const mergedCharacters = fallbackChars.map(fbChar => {
+      const draftChar = draftMap.get(fbChar.id);
+      return draftChar || fbChar;
+    });
+    const fallbackIds = new Set(fallbackChars.map(ch => ch.id));
+    draft.characters.forEach(ch => {
+      if (!fallbackIds.has(ch.id)) mergedCharacters.push(ch);
+    });
+    draft.characters = mergedCharacters;
+  } else {
+    draft.characters = fallbackConfig.characters || [];
   }
   const config = draft;
 
@@ -65,6 +77,7 @@
     byId("finish-support").value = config.settings.finishSupport;
     byId("prize-info").value = config.settings.prizeInfo || "";
     byId("registration-warning").value = config.settings.registrationWarning || "";
+    byId("scan-hint").value = config.settings.scanHint || "";
 
     /* Primary color */
     const primaryColor = config.settings.primaryColor || "#29771e";
@@ -280,6 +293,7 @@
     config.settings.finishSupport = byId("finish-support").value.trim();
     config.settings.prizeInfo = byId("prize-info").value.trim();
     config.settings.registrationWarning = byId("registration-warning").value.trim();
+    config.settings.scanHint = byId("scan-hint").value.trim();
 
     /* Primary color: prefer hex input, fallback to color picker */
     const hexValue = byId("primary-color-hex").value.trim();
@@ -349,32 +363,66 @@
 
   function resetPlayerProgress(playerId) {
     const participant = readLocalParticipant();
-    if (!participant || participant.id !== playerId) {
-      byId("admin-status").textContent = "Можно сбросить только локального игрока.";
-      return;
-    }
-    if (!confirm(`Сбросить прогресс игрока ${participant.name}? Все найденные персонажи и баллы будут обнулены.`)) return;
+    const isLocal = participant && participant.id === playerId;
 
-    participant.spots = {};
-    participant.score = 0;
-    participant.status = "active";
-    participant.completedAt = "";
-    localStorage.setItem(participantKey, JSON.stringify(participant));
-    byId("admin-status").textContent = `Прогресс игрока ${participant.name} сброшен.`;
-    renderPlayers();
+    if (!confirm(`Сбросить прогресс игрока? Все найденные персонажи и баллы будут обнулены.`)) return;
+
+    if (isLocal) {
+      participant.spots = {};
+      participant.score = 0;
+      participant.status = "active";
+      participant.completedAt = "";
+      localStorage.setItem(participantKey, JSON.stringify(participant));
+    }
+
+    /* Also reset in Sheets if endpoint is configured */
+    if (config.sheetEndpoint) {
+      fetch(config.sheetEndpoint, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          type: "player_reset",
+          sentAt: new Date().toISOString(),
+          payload: { playerId: playerId }
+        })
+      }).catch(() => {});
+    }
+
+    byId("admin-status").textContent = isLocal
+      ? `Прогресс игрока сброшен локально и в таблице.`
+      : `Запрос на сброс отправлен в таблицу.`;
+    setTimeout(() => renderPlayers(), 500);
   }
 
   function deletePlayer(playerId) {
     const participant = readLocalParticipant();
-    if (!participant || participant.id !== playerId) {
-      byId("admin-status").textContent = "Можно удалить только локального игрока.";
-      return;
-    }
-    if (!confirm(`Удалить игрока ${participant.name}? Это действие нельзя отменить.`)) return;
+    const isLocal = participant && participant.id === playerId;
 
-    localStorage.removeItem(participantKey);
-    byId("admin-status").textContent = `Игрок ${participant.name} удалён.`;
-    renderPlayers();
+    if (!confirm(`Удалить игрока? Это действие нельзя отменить.`)) return;
+
+    if (isLocal) {
+      localStorage.removeItem(participantKey);
+    }
+
+    /* Also delete from Sheets if endpoint is configured */
+    if (config.sheetEndpoint) {
+      fetch(config.sheetEndpoint, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          type: "player_delete",
+          sentAt: new Date().toISOString(),
+          payload: { playerId: playerId }
+        })
+      }).catch(() => {});
+    }
+
+    byId("admin-status").textContent = isLocal
+      ? `Игрок удалён локально и из таблицы.`
+      : `Запрос на удаление отправлен в таблицу.`;
+    setTimeout(() => renderPlayers(), 500);
   }
 
   function resetAllPlayers() {
@@ -438,12 +486,8 @@
               <td>${player.status === "completed" ? "Завершен" : "В игре"}</td>
               <td>
                 <div class="actions-cell">
-                  ${isLocal ? `
-                    <button class="reset-btn" data-action="reset" data-id="${player.id}">Сбросить</button>
-                    <button class="delete-btn" data-action="delete" data-id="${player.id}">Удалить</button>
-                  ` : `
-                    <span style="color:var(--muted);font-size:0.7rem;">только лок.</span>
-                  `}
+                  <button class="reset-btn" data-action="reset" data-id="${player.id}">Сбросить</button>
+                  <button class="delete-btn" data-action="delete" data-id="${player.id}">Удалить</button>
                 </div>
               </td>
             </tr>

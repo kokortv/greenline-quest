@@ -73,7 +73,8 @@ function getDefaultConfig() {
       registrationWarning: "",
       primaryColor: "#29771e",
       logoUrl: "",
-      roomDigits: 3
+      roomDigits: 3,
+      scanHint: ""
     },
     rooms: ["101", "102", "103", "104", "201", "202", "203", "204", "301", "302", "303", "304"],
     characters: [
@@ -253,6 +254,42 @@ function getPlayersList() {
   return players;
 }
 
+function deletePlayerRow(playerId) {
+  if (!playerId) return;
+  var sheet = getPlayersSheet();
+  if (!sheet) return;
+  var data = sheet.getDataRange().getValues();
+  for (var i = data.length - 1; i >= 1; i--) {
+    if (data[i][0] === playerId) {
+      sheet.deleteRow(i + 1);
+    }
+  }
+}
+
+function resetPlayerRow(playerId) {
+  if (!playerId) return;
+  var sheet = getPlayersSheet();
+  if (!sheet) return;
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0] === playerId) {
+      var rowData = [
+        data[i][0],   // id
+        data[i][1],   // name
+        data[i][2],   // room
+        0,            // score
+        0,            // found
+        0,            // solved
+        data[i][6],   // total
+        "0%",         // progress
+        "active",     // status
+        new Date().toISOString()  // lastActivity
+      ];
+      sheet.getRange(i + 1, 1, 1, 10).setValues([rowData]);
+    }
+  }
+}
+
 /* ================================================================
    WEB APP — обработка GET и POST запросов
    ================================================================ */
@@ -316,6 +353,16 @@ function doPost(e) {
     // Обновляем конфигурацию из админки
     if (type === "config_update" && payload.characters) {
       writeConfig(payload);
+    }
+
+    // Удаление игрока из таблицы
+    if (type === "player_delete") {
+      deletePlayerRow(payload.playerId || "");
+    }
+
+    // Сброс прогресса игрока в таблице
+    if (type === "player_reset") {
+      resetPlayerRow(payload.playerId || "");
     }
 
     return ContentService.createTextOutput(JSON.stringify({ status: "ok", type: type }))

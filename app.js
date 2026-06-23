@@ -22,23 +22,32 @@
       /* Only reset admin draft, keep player progress */
       localStorage.removeItem(adminDraftKey);
     }
-    /* Remove ?reset from URL and reload */
+    /* Remove ?reset from URL and hard-reload (bypass cache) */
     urlParams.delete("reset");
     const cleanUrl = urlParams.toString()
-      ? window.location.pathname + "?" + urlParams.toString()
-      : window.location.pathname;
+      ? window.location.pathname + "?" + urlParams.toString() + "&_t=" + Date.now()
+      : window.location.pathname + "?_t=" + Date.now();
     window.location.replace(cleanUrl);
     return;
   }
 
-  /* Merge admin draft with fallback — always keep fallback characters as base */
+  /* Merge admin draft with fallback — always preserve all fallback characters */
   const draft = readAdminDraft();
   let config;
   if (draft && draft.characters && draft.characters.length > 0) {
-    /* Use draft but ensure we have at least as many characters as fallback */
-    const mergedCharacters = draft.characters.length >= (fallbackConfig.characters || []).length
-      ? draft.characters
-      : fallbackConfig.characters;
+    /* Merge: start from fallback characters, then overlay draft characters by id */
+    const fallbackChars = fallbackConfig.characters || [];
+    const draftMap = new Map(draft.characters.map(ch => [ch.id, ch]));
+    /* For each fallback character: use draft version if exists, otherwise keep fallback */
+    const mergedCharacters = fallbackChars.map(fbChar => {
+      const draftChar = draftMap.get(fbChar.id);
+      return draftChar || fbChar;
+    });
+    /* Also include any NEW characters from draft that aren't in fallback */
+    const fallbackIds = new Set(fallbackChars.map(ch => ch.id));
+    draft.characters.forEach(ch => {
+      if (!fallbackIds.has(ch.id)) mergedCharacters.push(ch);
+    });
     config = normalizeConfig({ ...draft, characters: mergedCharacters });
   } else {
     config = normalizeConfig(fallbackConfig);
@@ -85,6 +94,7 @@
       primaryColor: "#29771e",
       logoUrl: "",
       roomDigits: 3,
+      scanHint: "",
       ...(raw.settings || {})
     };
 
@@ -118,7 +128,21 @@
       const response = await fetch(`${config.sheetEndpoint}?action=config`);
       const remote = await response.json();
       if (remote && remote.characters) {
-        config = normalizeConfig({ ...config, ...remote });
+        /* Always keep at least as many characters as the fallback config.
+           Remote config may be stale with fewer characters. */
+        const localCount = config.characters.length;
+        const remoteCount = remote.characters.length;
+        if (remoteCount < localCount) {
+          /* Remote has fewer — keep local characters, only merge settings */
+          const merged = { ...remote, characters: config.characters };
+          if (remote.settings) {
+            merged.settings = { ...config.settings, ...remote.settings };
+          }
+          config = normalizeConfig(merged);
+        } else {
+          config = normalizeConfig({ ...config, ...remote });
+        }
+        applyDynamicSettings();
         renderCurrentState();
       }
     } catch (error) {
@@ -265,6 +289,12 @@
     const warningEl = byId("registration-warning");
     if (warningEl) {
       warningEl.textContent = config.settings.registrationWarning || "";
+    }
+
+    /* Scan hint */
+    const scanHintEl = byId("scan-hint");
+    if (scanHintEl) {
+      scanHintEl.textContent = config.settings.scanHint || "Ищите QR-код в отмеченной зоне и сканируйте его камерой телефона.";
     }
 
     /* Room number input: restrict to digits, set max length */
