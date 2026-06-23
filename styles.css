@@ -498,7 +498,7 @@ input:disabled {
 
 .map-pin.is-unavailable img {
   filter: grayscale(1) blur(1px);
-  opacity: 0.3;
+  opacity: 1;
 }
 
 .map-pin.is-unavailable .pin-unavailable-icon {
@@ -820,13 +820,13 @@ input:disabled {
 }
 
 .character-fullscreen.is-unavailable .character-portrait {
-  filter: grayscale(1) opacity(0.8);
+  filter: grayscale(1) opacity(1);
   animation: none;
 }
 
 .character-fullscreen.is-unavailable .character-portrait:hover {
   transform: none;
-  filter: grayscale(1) opacity(0.8);
+  filter: grayscale(1) opacity(1);
 }
 
 .character-fullscreen.is-unavailable .character-name {

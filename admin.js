@@ -334,6 +334,7 @@
   function isCharacterAvailable(character) {
     if (!character) return false;
     if (character.enabled === false) return false;
+    if (character.active === false) return false;
 
     const weather = config.settings.currentWeather || "sun";
     if (character.weatherRule && character.weatherRule !== "any" && character.weatherRule !== weather) {
@@ -377,10 +378,30 @@
     };
   }
 
+  function sanitizeParticipantData(participant) {
+    if (!participant || !participant.spots) return participant;
+    let changed = false;
+    for (const character of config.characters) {
+      const spot = participant.spots[character.id];
+      if (!spot || !spot.found) continue;
+      if (character.enabled === false || !isCharacterAvailable(character)) {
+        participant.score -= Number(spot.score || character.foundPoints || 0);
+        delete participant.spots[character.id];
+        changed = true;
+      }
+    }
+    if (changed) {
+      participant.score = Math.max(0, participant.score);
+    }
+    return participant;
+  }
+
   function readLocalParticipant() {
     try {
       const stored = localStorage.getItem(participantKey);
-      return stored ? JSON.parse(stored) : null;
+      if (!stored) return null;
+      const participant = JSON.parse(stored);
+      return sanitizeParticipantData(participant);
     } catch (error) {
       return null;
     }

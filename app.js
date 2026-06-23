@@ -710,7 +710,8 @@
       if (characterView) characterView.classList.add("is-loading");
       renderCharacter(participant);
       const ch = getCharacter(characterId);
-      setQuestView("character", ch ? ch.name : undefined);
+      const found = Boolean(participant.spots?.[characterId]?.found);
+      setQuestView("character", (ch && found) ? ch.name : "???");
     }
   }
 
@@ -944,7 +945,8 @@
       if (cv) cv.classList.add("is-loading");
       renderCharacter(participant);
       const ch = getCharacter(currentSpot());
-      setQuestView("character", ch ? ch.name : undefined);
+      const found = Boolean(participant.spots?.[currentSpot()]?.found);
+      setQuestView("character", (ch && found) ? ch.name : "???");
     } else {
       setQuestView("map");
     }
