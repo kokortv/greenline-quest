@@ -46,6 +46,7 @@
       registrationWarning: "",
       primaryColor: "#29771e",
       logoUrl: "",
+      roomDigits: 3,
       ...(raw.settings || {})
     };
 
@@ -80,7 +81,6 @@
       const remote = await response.json();
       if (remote && remote.characters) {
         config = normalizeConfig({ ...config, ...remote });
-        populateRoomOptions();
         renderCurrentState();
       }
     } catch (error) {
@@ -126,9 +126,10 @@
 
   function validateRoom(room) {
     const value = room.trim();
-    if (!value) return "Введите номер комнаты.";
+    const digits = config.settings.roomDigits || 3;
+    if (!value) return `Введите номер комнаты (${digits} цифр).`;
     if (!/^\d+$/.test(value)) return "Номер комнаты должен содержать только цифры.";
-    if (value.length < 1 || value.length > 5) return "Введите корректный номер комнаты.";
+    if (value.length !== digits) return `Номер комнаты должен содержать ${digits} цифр.`;
     return "";
   }
 
@@ -226,6 +227,23 @@
     const warningEl = byId("registration-warning");
     if (warningEl) {
       warningEl.textContent = config.settings.registrationWarning || "";
+    }
+
+    /* Room number input: restrict to digits, set max length */
+    const roomInput = byId("room-number");
+    if (roomInput) {
+      const digits = config.settings.roomDigits || 3;
+      roomInput.maxLength = digits;
+      roomInput.minLength = digits;
+      roomInput.placeholder = String(Math.pow(10, digits - 1)); /* e.g. 100 for 3 digits */
+      /* Allow only digits — strip non-numeric on input (bind once) */
+      if (!roomInput.dataset.digitsBound) {
+        roomInput.dataset.digitsBound = "1";
+        roomInput.addEventListener("input", function onRoomInput() {
+          const maxLen = config.settings.roomDigits || 3;
+          this.value = this.value.replace(/\D/g, "").slice(0, maxLen);
+        });
+      }
     }
   }
 
@@ -353,10 +371,6 @@
     }).length;
     const percent = all.length ? Math.round((found / all.length) * 100) : 100;
     return { characters: all, found, solved, completed, percent };
-  }
-
-  function populateRoomOptions() {
-    byId("room-options").innerHTML = config.rooms.map((room) => `<option value="${room}"></option>`).join("");
   }
 
   function renderCurrentState() {
@@ -1023,8 +1037,10 @@
     link.click();
   });
 
-  populateRoomOptions();
   loadRemoteConfig();
+
+  /* Apply dynamic settings immediately (button color, logo, warning) */
+  applyDynamicSettings();
 
   const state = loadState();
   if (state) {

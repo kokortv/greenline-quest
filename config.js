@@ -21,7 +21,8 @@ window.HOTEL_QUEST_CONFIG = {
     prizeInfo: "",
     registrationWarning: "",
     primaryColor: "#29771e",
-    logoUrl: ""
+    logoUrl: "",
+    roomDigits: 3
   },
   rooms: [
     "101",

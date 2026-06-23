@@ -28,6 +28,7 @@
   function render() {
     byId("current-weather").value = config.settings.currentWeather;
     byId("max-attempts").value = config.settings.maxAttempts;
+    byId("room-digits").value = config.settings.roomDigits || 3;
     byId("finish-title").value = config.settings.finishTitle;
     byId("finish-success").value = config.settings.finishSuccess;
     byId("finish-support").value = config.settings.finishSupport;
@@ -242,6 +243,7 @@
   function collectSettings() {
     config.settings.currentWeather = byId("current-weather").value;
     config.settings.maxAttempts = Number(byId("max-attempts").value || 3);
+    config.settings.roomDigits = Math.max(1, Math.min(5, Number(byId("room-digits").value || 3)));
     config.settings.finishTitle = byId("finish-title").value.trim();
     config.settings.finishSuccess = byId("finish-success").value.trim();
     config.settings.finishSupport = byId("finish-support").value.trim();

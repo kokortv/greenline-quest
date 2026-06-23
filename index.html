@@ -27,7 +27,7 @@
       </label>
       <label>
         Номер комнаты
-        <input id="room-number" name="roomNumber" inputmode="numeric" pattern="[0-9]*" required minlength="1" placeholder="204" />
+        <input id="room-number" name="roomNumber" inputmode="numeric" pattern="[0-9]*" required minlength="3" maxlength="3" placeholder="204" />
       </label>
       <div class="registration-warning" id="registration-warning"></div>
       <button class="primary" type="submit">Начать игру</button>
@@ -160,8 +160,8 @@
       </div>
     </div>
     <p class="finish-copy" id="finish-copy"></p>
-    <div class="finish-banner-wrap">
-      <img class="finish-banner" id="finish-banner" src="images/final-banner.png" alt="" />
+    <div class="finish-banner-wrap" id="finish-banner-wrap">
+      <img class="finish-banner" id="finish-banner" src="images/final-banner.png" alt="" onerror="this.parentElement.style.display='none'" />
     </div>
     <div class="finish-score-block">
       <strong id="final-score">0</strong>
