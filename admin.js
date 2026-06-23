@@ -341,17 +341,22 @@
       return false;
     }
 
-    if (character.availableFrom && character.availableTo) {
-      const now = new Date();
-      const nowMinutes = now.getHours() * 60 + now.getMinutes();
-      const [fromH, fromM] = String(character.availableFrom).split(":").map(Number);
-      const [toH, toM] = String(character.availableTo).split(":").map(Number);
-      const fromMinutes = (fromH || 0) * 60 + (fromM || 0);
-      const toMinutes = (toH || 0) * 60 + (toM || 0);
-      if (nowMinutes < fromMinutes || nowMinutes > toMinutes) return false;
-    }
+    if (!character.availableFrom && !character.availableTo) return true;
 
-    return true;
+    const now = new Date();
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    const fromMinutes = timeToMinutes(character.availableFrom || "00:00");
+    const toMinutes = timeToMinutes(character.availableTo || "23:59");
+    const inRange = fromMinutes <= toMinutes
+      ? nowMinutes >= fromMinutes && nowMinutes <= toMinutes
+      : nowMinutes >= fromMinutes || nowMinutes <= toMinutes;
+    console.log(`[admin-availability] ${character.name}: from=${character.availableFrom}(${fromMinutes}) to=${character.availableTo}(${toMinutes}) now=${nowMinutes} inRange=${inRange}`);
+    return inRange;
+  }
+
+  function timeToMinutes(value) {
+    const [hours, minutes] = String(value).split(":").map(Number);
+    return (hours || 0) * 60 + (minutes || 0);
   }
 
   function summarizeParticipant(participant) {
@@ -384,7 +389,8 @@
     for (const character of config.characters) {
       const spot = participant.spots[character.id];
       if (!spot || !spot.found) continue;
-      if (character.enabled === false || !isCharacterAvailable(character)) {
+      const available = isCharacterAvailable(character);
+      if (character.enabled === false || !available) {
         participant.score -= Number(spot.score || character.foundPoints || 0);
         delete participant.spots[character.id];
         changed = true;
@@ -392,6 +398,10 @@
     }
     if (changed) {
       participant.score = Math.max(0, participant.score);
+      /* Save sanitized data back to localStorage so it persists */
+      try {
+        localStorage.setItem(participantKey, JSON.stringify(participant));
+      } catch (e) { /* ignore */ }
     }
     return participant;
   }

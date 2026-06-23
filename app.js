@@ -198,6 +198,7 @@
       const available = isCharacterAvailable(character);
       if (character.enabled === false || !available) {
         /* Remove the found status and reverse the score */
+        console.log(`[sanitize] Removing found for ${character.name} (enabled=${character.enabled}, available=${available}, from=${character.availableFrom}, to=${character.availableTo})`);
         participant.score -= Number(spot.score || character.foundPoints || 0);
         delete participant.spots[character.id];
         changed = true;
@@ -206,6 +207,7 @@
     if (changed) {
       participant.score = Math.max(0, participant.score);
       saveState(participant);
+      console.log(`[sanitize] Saved updated state, score=${participant.score}`);
     }
     return participant;
   }
