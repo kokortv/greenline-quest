@@ -784,6 +784,42 @@ input:disabled {
   background: var(--red-light);
 }
 
+/* === Unavailable character — grayed out === */
+.character-fullscreen.is-unavailable .character-hero {
+  background:
+    radial-gradient(ellipse at 50% 80%, rgba(101, 113, 123, 0.08), transparent 60%),
+    linear-gradient(180deg, #e0e3e5 0%, #eef0f1 60%, var(--bg) 100%);
+}
+
+.character-fullscreen.is-unavailable .character-portrait {
+  filter: grayscale(1) opacity(0.5);
+  animation: none;
+}
+
+.character-fullscreen.is-unavailable .character-portrait:hover {
+  transform: none;
+  filter: grayscale(1) opacity(0.5);
+}
+
+.character-fullscreen.is-unavailable .character-name {
+  color: var(--muted);
+}
+
+.character-fullscreen.is-unavailable .character-place {
+  color: var(--muted);
+}
+
+.character-fullscreen.is-unavailable .riddle {
+  border-left-color: var(--line);
+  background: #eef0f1;
+  color: var(--muted);
+}
+
+.character-fullscreen.is-unavailable .attempts-bar,
+.character-fullscreen.is-unavailable .status-pill {
+  display: none;
+}
+
 /* === Profile === */
 .profile-panel {
   display: grid;

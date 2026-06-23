@@ -750,11 +750,19 @@
     const answerForm = byId("answer-form");
     const answerInput = byId("answer-input");
     const avatar = byId("character-avatar");
+    const characterView = byId("character-view");
     feedback.textContent = "";
     feedback.className = "feedback";
     body.classList.remove("is-solved", "is-exhausted");
     answerForm.classList.remove("is-hidden");
     avatar.classList.remove("is-solved");
+    if (characterView) characterView.classList.remove("is-unavailable");
+
+    /* Restore attempts bar and status pill visibility (they may be hidden from unavailable state) */
+    const attemptsBarRestore = byId("attempts-bar");
+    if (attemptsBarRestore) attemptsBarRestore.style.display = "";
+    const statusPillRestore = byId("status-pill");
+    if (statusPillRestore) statusPillRestore.style.display = "";
 
     if (!character) {
       return;
@@ -804,6 +812,12 @@
       answerForm.classList.add("is-hidden");
       feedback.textContent = "";
       feedback.className = "feedback";
+      if (characterView) characterView.classList.add("is-unavailable");
+      /* Hide attempts and status pill */
+      const attemptsBar = byId("attempts-bar");
+      if (attemptsBar) attemptsBar.style.display = "none";
+      const statusPill = byId("status-pill");
+      if (statusPill) statusPill.style.display = "none";
       return;
     }
 
@@ -821,6 +835,12 @@
       answerForm.classList.add("is-hidden");
       feedback.textContent = "";
       feedback.className = "feedback";
+      if (characterView) characterView.classList.add("is-unavailable");
+      /* Hide attempts and status pill */
+      const attemptsBar = byId("attempts-bar");
+      if (attemptsBar) attemptsBar.style.display = "none";
+      const statusPill = byId("status-pill");
+      if (statusPill) statusPill.style.display = "none";
       return;
     }
 
@@ -850,7 +870,8 @@
 
   function render(participant) {
     const scannedCharacter = getCharacter(currentSpot());
-    if (participant.status !== "completed" && scannedCharacter && isCharacterAvailable(scannedCharacter)) {
+    /* Only reveal character if it's available */
+    if (participant.status !== "completed" && scannedCharacter && isCharacterAvailable(scannedCharacter) && scannedCharacter.enabled !== false) {
       revealCharacter(participant, scannedCharacter);
     }
 
