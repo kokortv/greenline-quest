@@ -642,6 +642,15 @@ input:disabled {
   display: none !important;
 }
 
+/* Hide content until renderCharacter() is called — prevents flash */
+.character-fullscreen.is-loading .character-body {
+  visibility: hidden;
+}
+
+.character-fullscreen.is-loading .character-hero {
+  visibility: hidden;
+}
+
 /* Hero — top area with large portrait */
 .character-hero {
   position: relative;

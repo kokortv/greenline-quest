@@ -144,6 +144,9 @@
           config = normalizeConfig({ ...config, ...remote });
         }
         applyDynamicSettings();
+        /* Re-sanitize state: weather or config may have changed, making some characters unavailable */
+        const p = getParticipant();
+        if (p) sanitizeState(p);
         renderCurrentState();
       }
     } catch (error) {
@@ -158,6 +161,29 @@
     } catch (error) {
       return null;
     }
+  }
+
+  /** Remove found status from unavailable characters.
+   *  This fixes old data where characters were marked found despite being unavailable. */
+  function sanitizeState(participant) {
+    if (!participant || !participant.spots) return participant;
+    let changed = false;
+    for (const character of config.characters) {
+      const spot = participant.spots[character.id];
+      if (!spot || !spot.found) continue;
+      const available = isCharacterAvailable(character);
+      if (character.enabled === false || !available) {
+        /* Remove the found status and reverse the score */
+        participant.score -= Number(spot.score || character.foundPoints || 0);
+        delete participant.spots[character.id];
+        changed = true;
+      }
+    }
+    if (changed) {
+      participant.score = Math.max(0, participant.score);
+      saveState(participant);
+    }
+    return participant;
   }
 
   function saveState(nextState) {
@@ -444,7 +470,10 @@
 
   function renderCurrentState() {
     const participant = getParticipant();
-    if (participant) render(participant);
+    if (participant) {
+      sanitizeState(participant);
+      render(participant);
+    }
   }
 
   /** Get character image based on state: not-found → found → solved */
@@ -675,6 +704,9 @@
     window.history.replaceState({}, "", url);
     const participant = getParticipant();
     if (participant) {
+      /* Set loading state before render to prevent flash */
+      const characterView = byId("character-view");
+      if (characterView) characterView.classList.add("is-loading");
       renderCharacter(participant);
       const ch = getCharacter(characterId);
       setQuestView("character", ch ? ch.name : undefined);
@@ -757,6 +789,9 @@
     answerForm.classList.remove("is-hidden");
     avatar.classList.remove("is-solved");
     if (characterView) characterView.classList.remove("is-unavailable");
+
+    /* Remove loading state — content is now ready */
+    if (characterView) characterView.classList.remove("is-loading");
 
     /* Restore attempts bar and status pill visibility (they may be hidden from unavailable state) */
     const attemptsBarRestore = byId("attempts-bar");
@@ -902,6 +937,9 @@
     }
 
     if (currentSpot()) {
+      /* Set loading state before render to prevent flash */
+      const cv = byId("character-view");
+      if (cv) cv.classList.add("is-loading");
       renderCharacter(participant);
       const ch = getCharacter(currentSpot());
       setQuestView("character", ch ? ch.name : undefined);
@@ -1138,6 +1176,7 @@
 
   const state = loadState();
   if (state) {
+    sanitizeState(state);
     render(state);
     syncQueue();
   } else {
