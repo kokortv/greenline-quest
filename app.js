@@ -4,7 +4,45 @@
   const queueKey = "hotelQuestSyncQueue";
   const adminDraftKey = "hotelQuestAdminDraft";
 
-  let config = normalizeConfig(readAdminDraft() || fallbackConfig);
+  /* === URL reset: ?reset or ?reset=config or ?reset=progress === */
+  const urlParams = new URLSearchParams(window.location.search);
+  const resetParam = urlParams.get("reset");
+  if (resetParam !== null) {
+    if (resetParam === "" || resetParam === "all") {
+      /* Full reset: clear everything */
+      localStorage.removeItem(storageKey);
+      localStorage.removeItem(adminDraftKey);
+      localStorage.removeItem(queueKey);
+      localStorage.removeItem("hotelQuestDeviceId");
+    } else if (resetParam === "progress") {
+      /* Only reset player progress, keep admin config */
+      localStorage.removeItem(storageKey);
+      localStorage.removeItem(queueKey);
+    } else if (resetParam === "config") {
+      /* Only reset admin draft, keep player progress */
+      localStorage.removeItem(adminDraftKey);
+    }
+    /* Remove ?reset from URL and reload */
+    urlParams.delete("reset");
+    const cleanUrl = urlParams.toString()
+      ? window.location.pathname + "?" + urlParams.toString()
+      : window.location.pathname;
+    window.location.replace(cleanUrl);
+    return;
+  }
+
+  /* Merge admin draft with fallback — always keep fallback characters as base */
+  const draft = readAdminDraft();
+  let config;
+  if (draft && draft.characters && draft.characters.length > 0) {
+    /* Use draft but ensure we have at least as many characters as fallback */
+    const mergedCharacters = draft.characters.length >= (fallbackConfig.characters || []).length
+      ? draft.characters
+      : fallbackConfig.characters;
+    config = normalizeConfig({ ...draft, characters: mergedCharacters });
+  } else {
+    config = normalizeConfig(fallbackConfig);
+  }
 
   /* Fix old pixel-based coordinates (x>100 or y>100) by clamping to percentages */
   config.characters.forEach((ch) => {

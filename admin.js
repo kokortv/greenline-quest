@@ -1,7 +1,38 @@
 (function () {
   const draftKey = "hotelQuestAdminDraft";
   const participantKey = "hotelQuestParticipant";
-  const config = loadConfig();
+
+  /* === URL reset: ?reset or ?reset=config or ?reset=progress === */
+  const urlParams = new URLSearchParams(window.location.search);
+  const resetParam = urlParams.get("reset");
+  if (resetParam !== null) {
+    if (resetParam === "" || resetParam === "all") {
+      localStorage.removeItem(participantKey);
+      localStorage.removeItem(draftKey);
+      localStorage.removeItem("hotelQuestSyncQueue");
+      localStorage.removeItem("hotelQuestDeviceId");
+    } else if (resetParam === "progress") {
+      localStorage.removeItem(participantKey);
+      localStorage.removeItem("hotelQuestSyncQueue");
+    } else if (resetParam === "config") {
+      localStorage.removeItem(draftKey);
+    }
+    urlParams.delete("reset");
+    const cleanUrl = urlParams.toString()
+      ? window.location.pathname + "?" + urlParams.toString()
+      : window.location.pathname;
+    window.location.replace(cleanUrl);
+    return;
+  }
+
+  const fallbackConfig = window.HOTEL_QUEST_CONFIG;
+  const draft = loadConfig();
+
+  /* Ensure admin always has at least as many characters as fallback */
+  if (draft.characters && draft.characters.length < (fallbackConfig.characters || []).length) {
+    draft.characters = fallbackConfig.characters;
+  }
+  const config = draft;
 
   /* Fix old pixel-based coordinates (x>100 or y>100) by clamping to percentages */
   if (config.characters) {
