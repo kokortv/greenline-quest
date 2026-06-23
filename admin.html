@@ -350,14 +350,29 @@
         <textarea id="prize-info" placeholder="Покажите этот текст гостю на финальном экране..."></textarea>
         <span class="hint-text">Отображается на финальном экране над кнопкой сохранения</span>
       </label>
-    </div>
-
-    <div class="admin-section">
-      <h2>Комнаты</h2>
       <label>
-        Список номеров через запятую
-        <textarea id="rooms"></textarea>
+        Предупреждение при регистрации
+        <textarea id="registration-warning" placeholder="Например: Игра доступна только для гостей отеля..."></textarea>
+        <span class="hint-text">Показывается над кнопкой «Начать игру» на стартовой странице</span>
       </label>
+      <div class="form-grid">
+        <label>
+          Цвет фона кнопок
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input id="primary-color" type="color" style="width:48px;height:40px;border:1px solid var(--line);border-radius:6px;padding:2px;cursor:pointer;" />
+            <input id="primary-color-hex" type="text" placeholder="#29771e" style="flex:1;" />
+          </div>
+          <span class="hint-text">Применяется ко всем основным кнопкам. По умолчанию #29771e</span>
+        </label>
+        <label>
+          Логотип отеля
+          <div style="display:flex;gap:8px;align-items:center;">
+            <img class="image-preview" id="logo-preview" src="" alt="Лого" style="width:50px;height:50px;border-radius:8px;" />
+            <input type="file" id="logo-file" accept="image/*" style="flex:1;" />
+          </div>
+          <span class="hint-text">Загрузите логотип — он заменит букву «H» в шапке на всех страницах</span>
+        </label>
+      </div>
     </div>
 
     <div class="admin-section">

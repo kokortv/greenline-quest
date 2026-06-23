@@ -32,7 +32,19 @@
     byId("finish-success").value = config.settings.finishSuccess;
     byId("finish-support").value = config.settings.finishSupport;
     byId("prize-info").value = config.settings.prizeInfo || "";
-    byId("rooms").value = config.rooms.join(", ");
+    byId("registration-warning").value = config.settings.registrationWarning || "";
+
+    /* Primary color */
+    const primaryColor = config.settings.primaryColor || "#29771e";
+    byId("primary-color").value = primaryColor;
+    byId("primary-color-hex").value = primaryColor;
+
+    /* Logo */
+    const logoPreview = byId("logo-preview");
+    if (logoPreview && config.settings.logoUrl) {
+      logoPreview.src = config.settings.logoUrl;
+    }
+
     renderCharacters();
     renderPlayers();
     renderAdminMap();
@@ -234,7 +246,19 @@
     config.settings.finishSuccess = byId("finish-success").value.trim();
     config.settings.finishSupport = byId("finish-support").value.trim();
     config.settings.prizeInfo = byId("prize-info").value.trim();
-    config.rooms = byId("rooms").value.split(",").map((room) => room.trim()).filter(Boolean);
+    config.settings.registrationWarning = byId("registration-warning").value.trim();
+
+    /* Primary color: prefer hex input, fallback to color picker */
+    const hexValue = byId("primary-color-hex").value.trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(hexValue)) {
+      config.settings.primaryColor = hexValue;
+    } else {
+      config.settings.primaryColor = byId("primary-color").value || "#29771e";
+    }
+
+    /* logoUrl is set via file upload handler, no need to collect from input */
+
+    config.rooms = config.rooms || [];
   }
 
   async function save() {
@@ -587,6 +611,30 @@
   byId("refresh-players").addEventListener("click", renderPlayers);
   byId("reset-all-players").addEventListener("click", resetAllPlayers);
   byId("reset-positions").addEventListener("click", resetPositions);
+
+  /* Primary color: sync picker ↔ hex input */
+  byId("primary-color").addEventListener("input", () => {
+    byId("primary-color-hex").value = byId("primary-color").value;
+  });
+  byId("primary-color-hex").addEventListener("input", () => {
+    const val = byId("primary-color-hex").value.trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+      byId("primary-color").value = val;
+    }
+  });
+
+  /* Logo upload */
+  byId("logo-file").addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      config.settings.logoUrl = ev.target.result;
+      const preview = byId("logo-preview");
+      if (preview) preview.src = config.settings.logoUrl;
+    };
+    reader.readAsDataURL(file);
+  });
 
   document.querySelectorAll("[data-admin-tab]").forEach((button) => {
     button.addEventListener("click", () => setTab(button.dataset.adminTab));

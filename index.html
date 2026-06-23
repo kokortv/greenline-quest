@@ -10,7 +10,7 @@
 <main class="app" id="app">
   <section class="screen screen-active" id="start-screen" aria-labelledby="start-title">
     <div class="brand-row">
-      <div class="brand-mark">H</div>
+      <div class="brand-mark" id="logo-start"></div>
       <div>
         <p class="eyebrow">Green Line Batumi</p>
         <h1 id="start-title">Пройди квест</h1>
@@ -27,9 +27,9 @@
       </label>
       <label>
         Номер комнаты
-        <input id="room-number" name="roomNumber" inputmode="numeric" list="room-options" required minlength="1" placeholder="204" />
-        <datalist id="room-options"></datalist>
+        <input id="room-number" name="roomNumber" inputmode="numeric" pattern="[0-9]*" required minlength="1" placeholder="204" />
       </label>
+      <div class="registration-warning" id="registration-warning"></div>
       <button class="primary" type="submit">Начать игру</button>
       <p class="feedback feedback-error" id="registration-feedback" role="status"></p>
     </form>
@@ -38,7 +38,7 @@
   <section class="screen" id="quest-screen" aria-labelledby="quest-title">
     <header class="topbar" id="topbar">
       <div class="topbar-left">
-        <div class="brand-mark">H</div>
+        <div class="brand-mark" id="logo-topbar"></div>
         <div>
           <p class="eyebrow">Green Line Batumi</p>
           <h2 id="quest-title">Карта поиска</h2>
@@ -153,19 +153,19 @@
 
   <section class="screen" id="finish-screen" aria-labelledby="finish-title">
     <div class="finish-header">
-      <div class="brand-mark">H</div>
+      <div class="brand-mark" id="logo-finish"></div>
       <div>
         <p class="eyebrow">Green Line Batumi</p>
         <h1 id="finish-title">Все хранители собраны</h1>
       </div>
     </div>
     <p class="finish-copy" id="finish-copy"></p>
+    <div class="finish-banner-wrap">
+      <img class="finish-banner" id="finish-banner" src="images/final-banner.png" alt="" />
+    </div>
     <div class="finish-score-block">
-      <span class="finish-trophy">🏆</span>
-      <div class="finish-score-right">
-        <strong id="final-score">0</strong>
-        <span>баллов</span>
-      </div>
+      <strong id="final-score">0</strong>
+      <span>баллов</span>
     </div>
     <div class="finish-stats">
       <div class="finish-stat">

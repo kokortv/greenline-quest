@@ -88,6 +88,15 @@ textarea {
   font-weight: 900;
   font-size: 1.3rem;
   box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .eyebrow {
@@ -1118,8 +1127,8 @@ input:disabled {
 
 .finish-score-block {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
   padding: 24px;
   border-radius: var(--radius);
   background: linear-gradient(135deg, #192027 0%, #2a3444 100%);
@@ -1134,20 +1143,7 @@ input:disabled {
   letter-spacing: -0.02em;
 }
 
-.finish-trophy {
-  font-size: 3.5rem;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.finish-score-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-}
-
-.finish-score-right span {
+.finish-score-block span {
   color: rgba(255, 253, 247, 0.6);
   font-size: 0.85rem;
   font-weight: 700;
@@ -1155,15 +1151,65 @@ input:disabled {
   letter-spacing: 0.04em;
 }
 
+.finish-banner-wrap {
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.finish-banner {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 35vh;
+  object-fit: cover;
+  object-position: center;
+}
+
 .finish-prizes {
-  padding: 16px 18px;
-  border-radius: var(--radius-sm);
-  background: var(--green-light);
-  border: 1px solid rgba(31, 122, 91, 0.2);
-  color: var(--green);
+  padding: 22px 20px;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, #1a4a2e 0%, #1f6a3e 50%, #1a4a2e 100%);
+  border: 3px solid #e8a317;
+  color: #fffdf7;
   font-weight: 700;
-  font-size: 0.9rem;
-  line-height: 1.45;
+  font-size: 1rem;
+  line-height: 1.5;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(31, 122, 91, 0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+  animation: prizeGlow 2s ease-in-out infinite alternate;
+  position: relative;
+}
+
+.finish-prizes::before {
+  content: "★ Призы ★";
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #e8a317;
+  margin-bottom: 8px;
+}
+
+@keyframes prizeGlow {
+  from { box-shadow: 0 4px 16px rgba(31, 122, 91, 0.2), 0 0 0 0 rgba(232, 163, 23, 0); }
+  to { box-shadow: 0 4px 24px rgba(31, 122, 91, 0.4), 0 0 20px 2px rgba(232, 163, 23, 0.25); }
+}
+
+.registration-warning {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: #fef9ee;
+  border: 1px solid #f0d98a;
+  color: #8a6d00;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.registration-warning:empty {
+  display: none;
 }
 
 

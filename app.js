@@ -43,6 +43,9 @@
       finishSupport: "Квест завершен. Не все загадки покорились, но коллекция собрана.",
       nameBlockList: [],
       prizeInfo: "",
+      registrationWarning: "",
+      primaryColor: "#29771e",
+      logoUrl: "",
       ...(raw.settings || {})
     };
 
@@ -109,13 +112,23 @@
     if (value.length < 2 || value.length > 32) return "Имя должно быть от 2 до 32 символов.";
     if (!/^[A-Za-zА-Яа-яЁё' -]+$/.test(value)) return "В имени можно использовать только буквы, пробел и дефис.";
     if (/(.)\1{4,}/.test(normalized)) return "Похоже на случайный набор символов. Введите настоящее имя.";
+    if (/^[А-Яа-яЁё]{1,2}$/.test(value) && !/^[А-Яа-яЁё]{2}$/.test(normalized)) return "Имя слишком короткое. Введите настоящее имя.";
     if (blocked.some((word) => word && normalized.includes(word))) return "Введите имя без грубых или служебных слов.";
+    /* Extended profanity patterns */
+    const profanityPatterns = [
+      /хуй|ху[йеяию]/, /пид[аеор]/, /пидр/, /еб[аулит]/, /бля[дт]/, /сра[тн]/, /гандон/, /гавн/,
+      /муда/, /залуп/, /дроч/, /пизд/, /сука/, /уёб/, /урод/, /дерьм/, /сук[аи]/,
+      /fuck|shit|bitch|ass|dick|cunt|piss|crap|bastard|damn|whore|slut|fag|idiot|moron|retard/i
+    ];
+    if (profanityPatterns.some((p) => p.test(normalized))) return "Введите корректное имя без грубых слов.";
     return "";
   }
 
   function validateRoom(room) {
     const value = room.trim();
-    if (!config.rooms.includes(value)) return "Выберите номер комнаты из списка отеля.";
+    if (!value) return "Введите номер комнаты.";
+    if (!/^\d+$/.test(value)) return "Номер комнаты должен содержать только цифры.";
+    if (value.length < 1 || value.length > 5) return "Введите корректный номер комнаты.";
     return "";
   }
 
@@ -180,6 +193,49 @@
 
     /* Map button: show on character & profile, hide on map */
     byId("map-button").hidden = name === "map";
+  }
+
+  /** Apply dynamic settings: logo, button color, warning */
+  function applyDynamicSettings() {
+    /* Logo */
+    const logoUrl = config.settings.logoUrl;
+    document.querySelectorAll(".brand-mark").forEach((el) => {
+      if (logoUrl) {
+        el.innerHTML = `<img src="${logoUrl}" alt="Logo" />`;
+      } else {
+        el.textContent = "H";
+      }
+    });
+
+    /* Primary button color */
+    const color = config.settings.primaryColor || "#29771e";
+    document.documentElement.style.setProperty("--btn-bg", color);
+    /* Inject button styles dynamically */
+    let style = document.getElementById("dynamic-btn-style");
+    if (!style) {
+      style = document.createElement("style");
+      style.id = "dynamic-btn-style";
+      document.head.appendChild(style);
+    }
+    style.textContent = `
+      .primary { background: linear-gradient(135deg, ${color}, ${adjustColor(color, -20)}); }
+      .primary:hover:not(:disabled) { background: linear-gradient(135deg, ${adjustColor(color, -15)}, ${adjustColor(color, -30)}); }
+    `;
+
+    /* Registration warning */
+    const warningEl = byId("registration-warning");
+    if (warningEl) {
+      warningEl.textContent = config.settings.registrationWarning || "";
+    }
+  }
+
+  function adjustColor(hex, amount) {
+    hex = hex.replace("#", "");
+    const num = parseInt(hex, 16);
+    let r = Math.max(0, Math.min(255, ((num >> 16) & 0xFF) + amount));
+    let g = Math.max(0, Math.min(255, ((num >> 8) & 0xFF) + amount));
+    let b = Math.max(0, Math.min(255, (num & 0xFF) + amount));
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
   }
 
   /** Update weather icon in topbar */
@@ -715,6 +771,7 @@
     byId("profile-name").textContent = participant.name;
     byId("profile-room").textContent = `Комната ${participant.room}`;
     updateWeatherIcon();
+    applyDynamicSettings();
     byId("score-value").textContent = participant.score;
     byId("found-value").textContent = `${progress.found}/${progress.characters.length}`;
     byId("progress-value").textContent = `${progress.percent}%`;
@@ -799,35 +856,28 @@
     const finishText = allSolved ? config.settings.finishSuccess : config.settings.finishSupport;
     wrapText(ctx, finishText, 40, 135, W - 80, 20);
 
-    /* Trophy + Score (trophy left of number, same height) */
+    /* Score */
     const scoreStr = String(participant.score);
-    ctx.font = "900 72px Inter, system-ui, sans-serif";
-    const scoreWidth = ctx.measureText(scoreStr).width;
-    ctx.font = "64px sans-serif";
-    const trophyWidth = 64;
-    const totalWidth = trophyWidth + 12 + scoreWidth;
-    const startX = (W - totalWidth) / 2;
-
-    /* Trophy emoji */
-    ctx.font = "64px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("\uD83C\uDFC6", startX, 270);
-
-    /* Score number */
     ctx.fillStyle = "#192027";
     ctx.font = "900 72px Inter, system-ui, sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText(scoreStr, startX + trophyWidth + 12, 280);
+    ctx.textAlign = "center";
+    ctx.fillText(scoreStr, W / 2, 270);
 
     /* "БАЛЛОВ" label */
     ctx.fillStyle = "#65717b";
     ctx.font = "800 16px Inter, system-ui, sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("БАЛЛОВ", W / 2, 330);
+    ctx.fillText("БАЛЛОВ", W / 2, 310);
+
+    /* Date */
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
+    ctx.fillStyle = "#65717b";
+    ctx.font = "600 13px Inter, system-ui, sans-serif";
+    ctx.fillText(dateStr, W / 2, 340);
 
     /* Divider */
     ctx.fillStyle = "#d9d0c0";
-    ctx.fillRect(40, 370, W - 80, 1);
+    ctx.fillRect(40, 365, W - 80, 1);
 
     /* Stats */
     ctx.textAlign = "left";
@@ -842,7 +892,7 @@
     ];
 
     stats.forEach((s, i) => {
-      const y = 420 + i * 70;
+      const y = 405 + i * 65;
       ctx.fillStyle = "#65717b";
       ctx.font = "800 11px Inter, system-ui, sans-serif";
       ctx.fillText(s.label, 40, y);
@@ -853,19 +903,19 @@
 
     /* Progress bar */
     ctx.fillStyle = "#e8eef0";
-    ctx.fillRect(40, 700, W - 80, 12);
+    ctx.fillRect(40, 680, W - 80, 12);
     const barGrad = ctx.createLinearGradient(40, 0, 40 + (W - 80) * progress.percent / 100, 0);
     barGrad.addColorStop(0, "#2364aa");
     barGrad.addColorStop(1, "#1f7a5b");
     ctx.fillStyle = barGrad;
-    ctx.fillRect(40, 700, Math.max(12, (W - 80) * progress.percent / 100), 12);
+    ctx.fillRect(40, 680, Math.max(12, (W - 80) * progress.percent / 100), 12);
 
     /* Prize info */
     if (config.settings.prizeInfo) {
       ctx.fillStyle = "#1f7a5b";
       ctx.font = "700 14px Inter, system-ui, sans-serif";
       ctx.textAlign = "left";
-      wrapText(ctx, config.settings.prizeInfo, 40, 740, W - 80, 18);
+      wrapText(ctx, config.settings.prizeInfo, 40, 720, W - 80, 18);
     }
 
     /* Footer */
