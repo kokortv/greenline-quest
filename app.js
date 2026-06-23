@@ -431,6 +431,8 @@
   }
 
   function isCharacterAvailable(character) {
+    if (!character) return false;
+    if (character.enabled === false) return false;
     if (!character.active) return false;
     if (character.weatherRule !== "any" && character.weatherRule !== config.settings.currentWeather) return false;
     if (!character.availableFrom && !character.availableTo) return true;
@@ -716,6 +718,9 @@
   }
 
   function revealCharacter(participant, character) {
+    /* Safety check: never reveal an unavailable character */
+    if (!isCharacterAvailable(character)) return;
+
     if (!participant.spots[character.id]) {
       participant.spots[character.id] = {
         found: true,
