@@ -748,31 +748,12 @@
   function renderFinish(participant, progress) {
     byId("finish-title").textContent = config.settings.finishTitle;
     const allSolved = progress.solved === progress.characters.length;
-    byId("finish-copy").textContent = `${allSolved ? config.settings.finishSuccess : config.settings.finishSupport} ${participant.name}, результат комнаты ${participant.room}: ${participant.score} баллов.`;
-    drawResultCard(participant, progress);
-  }
-
-  function drawResultCard(participant, progress) {
-    const canvas = byId("result-card");
-    const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#f5f1e8";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#192027";
-    ctx.font = "700 54px sans-serif";
-    ctx.fillText(config.hotelName, 70, 120);
-    ctx.font = "700 72px sans-serif";
-    ctx.fillText(`${participant.score} баллов`, 70, 270);
-    ctx.font = "500 34px sans-serif";
-    ctx.fillText(`Игрок: ${participant.name}`, 70, 370);
-    ctx.fillText(`Комната: ${participant.room}`, 70, 430);
-    ctx.fillText(`Персонажи: ${progress.found}/${progress.characters.length}`, 70, 490);
-    ctx.fillStyle = "#2364aa";
-    ctx.fillRect(70, 560, Math.max(24, progress.percent * 7), 34);
-    ctx.fillStyle = "#192027";
-    ctx.font = "700 32px sans-serif";
-    ctx.fillText(`Прогресс ${progress.percent}%`, 70, 650);
-    ctx.font = "500 28px sans-serif";
-    ctx.fillText("Спасибо за игру", 70, 1060);
+    byId("finish-copy").textContent = allSolved ? config.settings.finishSuccess : config.settings.finishSupport;
+    byId("final-score").textContent = participant.score;
+    byId("finish-name").textContent = participant.name;
+    byId("finish-room").textContent = participant.room;
+    byId("finish-found").textContent = `${progress.found}/${progress.characters.length}`;
+    byId("finish-progress").textContent = `${progress.percent}%`;
   }
 
   function returnToMap() {
@@ -848,10 +829,28 @@
     showWeatherToast(labels[weather] || "Погода", colors[weather] || "#2364aa");
   });
   byId("save-result-button").addEventListener("click", () => {
+    const participant = getParticipant();
+    if (!participant) return;
+    const progress = getProgress(participant);
+    const allSolved = progress.solved === progress.characters.length;
+    const text = [
+      config.hotelName,
+      config.settings.finishTitle,
+      "",
+      allSolved ? config.settings.finishSuccess : config.settings.finishSupport,
+      "",
+      `${participant.score} баллов`,
+      `Игрок: ${participant.name}`,
+      `Комната: ${participant.room}`,
+      `Персонажи: ${progress.found}/${progress.characters.length}`,
+      `Прогресс: ${progress.percent}%`
+    ].join("\n");
+    const blob = new Blob([text], { type: "text/plain" });
     const link = document.createElement("a");
-    link.download = "hotel-quest-result.png";
-    link.href = byId("result-card").toDataURL("image/png");
+    link.download = "hotel-quest-result.txt";
+    link.href = URL.createObjectURL(blob);
     link.click();
+    URL.revokeObjectURL(link.href);
   });
 
   populateRoomOptions();

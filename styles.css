@@ -121,60 +121,21 @@ h2 {
 /* === Hero Scene === */
 .hero-scene {
   position: relative;
-  height: 260px;
   margin: 24px 0 18px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   overflow: hidden;
-  background:
-    linear-gradient(#dbe9ef 0 55%, #bfd5c3 55%),
-    #dbe9ef;
+  background: #dbe9ef;
   box-shadow: var(--shadow-lg);
 }
 
-.hotel-shape {
-  position: absolute;
-  left: 50%;
-  bottom: 26px;
-  display: grid;
-  grid-template-columns: repeat(3, 32px);
-  gap: 10px;
-  width: 166px;
-  height: 160px;
-  padding: 52px 25px 18px;
-  transform: translateX(-50%);
-  border-radius: 12px 12px 4px 4px;
-  background: #fffdf7;
-  border: 3px solid #192027;
-}
-
-.hotel-shape::before {
-  content: "";
-  position: absolute;
-  inset: 22px 38px auto;
-  height: 18px;
-  background: #2364aa;
-  border-radius: 8px 8px 2px 2px;
-}
-
-.hotel-shape span {
-  height: 24px;
-  border-radius: 5px;
-  background: #f0c85a;
-  border: 2px solid #192027;
-}
-
-.hero-character {
-  position: absolute;
-  right: 42px;
-  bottom: 22px;
-  width: 82px;
-  height: 82px;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 50% 34%, #fff9d9 0 14%, transparent 15%),
-    radial-gradient(circle at 50% 52%, #d1663f 0 38%, transparent 39%);
-  border: 3px solid #192027;
+.hero-banner {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 50vh;
+  object-fit: cover;
+  object-position: center;
 }
 
 /* === Panels === */
@@ -1134,25 +1095,50 @@ input:disabled {
 
 /* === Finish Screen === */
 #finish-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   min-height: calc(100vh - 42px);
-  align-content: center;
-  text-align: center;
+  animation: screenIn 0.4s ease both;
 }
 
-.finish-badge {
-  display: grid;
-  place-items: center;
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 18px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--green), #28a07a);
-  color: #fff;
-  font-size: 2.5rem;
-  font-weight: 900;
-  border: 3px solid #192027;
-  box-shadow: 0 4px 20px rgba(31, 122, 91, 0.3);
+.finish-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.finish-copy {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+  font-size: 0.95rem;
+}
+
+.finish-score-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, #192027 0%, #2a3444 100%);
+  color: #fffdf7;
+  box-shadow: var(--shadow-lg);
   animation: badgePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.finish-score-block strong {
+  font-size: 3.5rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.finish-score-block span {
+  color: rgba(255, 253, 247, 0.6);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 @keyframes badgePop {
@@ -1166,38 +1152,47 @@ input:disabled {
   }
 }
 
-.finish-copy {
-  color: var(--muted);
-  line-height: 1.45;
+.finish-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
-.final-score {
-  margin: 22px 0;
-  padding: 22px;
-  border-radius: var(--radius);
+.finish-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 8px;
+  border-radius: var(--radius-sm);
   background: var(--panel);
   border: 1px solid var(--line);
-  box-shadow: var(--shadow-lg);
+  text-align: center;
 }
 
-.final-score strong {
-  display: block;
-  font-size: 3rem;
-  line-height: 1;
+.finish-stat-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--blue);
 }
 
-.final-score span {
+.finish-stat:nth-child(1) .finish-stat-icon { color: #d1663f; }
+.finish-stat:nth-child(2) .finish-stat-icon { color: var(--blue); }
+.finish-stat:nth-child(3) .finish-stat-icon { color: #e8a317; }
+.finish-stat:nth-child(4) .finish-stat-icon { color: var(--green); }
+
+.finish-stat-value {
+  font-weight: 900;
+  font-size: 1.1rem;
+  line-height: 1.2;
+}
+
+.finish-stat-label {
   color: var(--muted);
-}
-
-.result-card {
-  display: block;
-  width: 100%;
-  height: auto;
-  margin: 18px 0 12px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--bg);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 /* === Hint Bubble === */
