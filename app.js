@@ -557,7 +557,7 @@
     const found = Boolean(spot?.found);
     const available = isCharacterAvailable(character);
 
-    if (character.enabled === false || !available) {
+    if (character.enabled === false || (!available && !found)) {
       const hint = character.unavailableHint || "Персонаж недоступен";
       showBubble(hint, pinElement, "#65717b");
       return;
@@ -723,10 +723,10 @@
   }
 
   function revealCharacter(participant, character) {
-    /* Safety check: never reveal an unavailable character */
-    if (!isCharacterAvailable(character)) {
-      return;
-    }
+    /* Safety check: only block if character is disabled or not yet found AND unavailable */
+    const alreadyFound = Boolean(participant.spots?.[character.id]?.found);
+    if (character.enabled === false) return;
+    if (!alreadyFound && !isCharacterAvailable(character)) return;
 
     if (!participant.spots[character.id]) {
       participant.spots[character.id] = {
@@ -922,8 +922,11 @@
   function render(participant) {
     const scannedCharacter = getCharacter(currentSpot());
     /* Only reveal character if it's available */
-    if (participant.status !== "completed" && scannedCharacter && isCharacterAvailable(scannedCharacter) && scannedCharacter.enabled !== false) {
-      revealCharacter(participant, scannedCharacter);
+    if (participant.status !== "completed" && scannedCharacter && scannedCharacter.enabled !== false) {
+      const alreadyFound = Boolean(participant.spots?.[scannedCharacter.id]?.found);
+      if (alreadyFound || isCharacterAvailable(scannedCharacter)) {
+        revealCharacter(participant, scannedCharacter);
+      }
     }
 
     const progress = getProgress(participant);
@@ -1134,7 +1137,10 @@
     event.preventDefault();
 
     const character = getCharacter(currentSpot());
-    if (!character || !isCharacterAvailable(character)) return;
+    if (!character || character.enabled === false) return;
+    const p = getParticipant();
+    const spot = p?.spots?.[character.id];
+    if (!spot?.found && !isCharacterAvailable(character)) return;
 
     const input = byId("answer-input");
     const answer = normalizeText(input.value);
