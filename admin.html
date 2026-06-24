@@ -59,10 +59,69 @@
         .character-editor {
           display: grid;
           gap: 12px;
-          padding: 14px;
+          padding: 0;
           border: 1px solid var(--line);
           border-radius: 8px;
           background: #fff;
+          overflow: hidden;
+        }
+        .character-header-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 10px 14px;
+          background: #f8f5ed;
+          border-bottom: 1px solid var(--line);
+          cursor: pointer;
+        }
+        .character-toggle {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0;
+          font: inherit;
+          color: var(--ink);
+        }
+        .character-toggle .toggle-arrow {
+          display: inline-block;
+          transition: transform 0.2s ease;
+          font-size: 0.7rem;
+          color: var(--muted);
+        }
+        .character-editor.is-open .character-toggle .toggle-arrow {
+          transform: rotate(90deg);
+        }
+        .character-toggle .character-title {
+          font-size: 0.95rem;
+        }
+        .character-color-dot {
+          display: inline-block;
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          border: 1px solid var(--line);
+        }
+        .character-delete-btn {
+          min-height: 32px;
+          padding: 0 12px;
+          border: 1px solid #b94d3e;
+          border-radius: 6px;
+          background: #fffdf7;
+          color: #b94d3e;
+          font-weight: 700;
+          font-size: 0.8rem;
+          cursor: pointer;
+        }
+        .character-body {
+          display: none;
+          padding: 14px;
+          gap: 12px;
+        }
+        .character-editor.is-open .character-body {
+          display: grid;
         }
         .editor-list {
           display: grid;
@@ -458,10 +517,19 @@
 
 <template id="character-template">
   <article class="character-editor">
+    <div class="character-header-row">
+      <button class="character-toggle" type="button" aria-label="Развернуть/свернуть">
+        <span class="toggle-arrow">&#9654;</span>
+        <strong class="character-title">Персонаж</strong>
+        <span class="character-color-dot"></span>
+      </button>
+      <button class="character-delete-btn" data-action="delete-character" type="button">Удалить</button>
+    </div>
+    <div class="character-body">
     <div class="form-grid">
       <label>Включен<select data-field="enabled"><option value="true">Да</option><option value="false">Нет</option></select></label>
       <label>Активен<select data-field="active"><option value="true">Да</option><option value="false">Нет</option></select></label>
-      <label>ID<input data-field="id" disabled readonly style="opacity:0.6;cursor:not-allowed;" /><span class="hint-text">Генерируется автоматически</span></label>
+      <label>ID<input data-field="id" /><span class="hint-text">Уникальный идентификатор (латиницей, без пробелов)</span></label>
       <label>Имя<input data-field="name" /></label>
       <label>Цвет<input data-field="color" type="color" /></label>
       <label>X<input data-field="x" inputmode="numeric" /></label>
@@ -529,6 +597,8 @@
       <span data-preview="hintAudio"></span>
     </label>
 
+    </div>
+
     <!-- QR-код для персонажа -->
     <div class="qr-section" style="display:grid;gap:10px;padding:14px;border:1px solid var(--line);border-radius:8px;background:#fff;">
       <strong style="font-size:0.85rem;">QR-код персонажа</strong>
@@ -544,9 +614,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Кнопка удаления персонажа -->
-    <button class="character-delete-btn" data-action="delete-character" type="button">Удалить персонажа</button>
   </article>
 </template>
 

@@ -117,61 +117,16 @@ function writeCharacters(characters) {
 function getDefaultCharacters() {
   return [
     {
-      id: "lobby", name: "Люмен", color: "#2364aa",
-      x: 50, y: 20, enabled: true, active: true, weatherRule: "any",
+      id: "example", name: "Пример персонажа", color: "#2364aa",
+      x: 50, y: 50, enabled: true, active: true, weatherRule: "any",
       availableFrom: "", availableTo: "",
       foundPoints: 10, attemptPoints: [30, 20, 10],
-      riddle: "Я встречаю гостей первым, храню ключи и улыбки. Где я?",
-      answers: ["ресепшен", "reception", "стойка регистрации", "лобби"],
+      riddle: "Загадка для примера — замените на свою",
+      answers: ["ответ"],
       image: "", imageSolved: "",
-      hintType: "text", hintText: "Я в лобби, подойди ко мне!",
-      hintFoundText: "Ты уже встретил меня!", hintAudio: ""
-    },
-    {
-      id: "cafe", name: "Мира", color: "#d1663f",
-      x: 26, y: 43, enabled: true, active: true, weatherRule: "any",
-      availableFrom: "", availableTo: "",
-      foundPoints: 10, attemptPoints: [30, 20, 10],
-      riddle: "Здесь утро пахнет кофе, а разговоры становятся теплее за маленьким столиком.",
-      answers: ["кафе", "coffee", "кофе", "кофейня"],
-      image: "", imageSolved: "",
-      hintType: "text", hintText: "Я в кафе, загляни туда!",
-      hintFoundText: "Ты меня уже нашёл!", hintAudio: ""
-    },
-    {
-      id: "pool", name: "Ори", color: "#2a8c82",
-      x: 74, y: 43, enabled: true, active: true, weatherRule: "sun",
-      availableFrom: "", availableTo: "",
-      foundPoints: 10, attemptPoints: [30, 20, 10],
-      riddle: "Я отражаю потолок, шепчу водой и жду тех, кто хочет поплавать.",
-      answers: ["бассейн", "pool", "вода"],
-      image: "", imageSolved: "",
-      hintType: "text", hintText: "Я у бассейна, приходи в солнечный день!",
-      hintFoundText: "Ты меня уже нашёл!", hintAudio: "",
-      unavailableHint: "Я появляюсь только в солнечную погоду. Приходи, когда будет солнце!"
-    },
-    {
-      id: "garden", name: "Флора", color: "#6f8f3d",
-      x: 28, y: 76, enabled: true, active: true, weatherRule: "rain",
-      availableFrom: "", availableTo: "",
-      foundPoints: 10, attemptPoints: [30, 20, 10],
-      riddle: "Здесь слышны листья, пахнет землей, а дорожка ведет между зеленью.",
-      answers: ["сад", "garden", "двор", "зелень"],
-      image: "", imageSolved: "",
-      hintType: "text", hintText: "Я в саду, иди под дождём!",
-      hintFoundText: "Ты меня уже нашёл!", hintAudio: "",
-      unavailableHint: "Я появляюсь только в дождливую погоду. Приходи, когда пойдёт дождь!"
-    },
-    {
-      id: "stairs", name: "Степ", color: "#7a5cba",
-      x: 72, y: 76, enabled: true, active: true, weatherRule: "any",
-      availableFrom: "", availableTo: "",
-      foundPoints: 10, attemptPoints: [30, 20, 10],
-      riddle: "Я не лифт, но тоже поднимаю выше. Мои ступени знают путь между этажами.",
-      answers: ["лестница", "stairs", "ступени"],
-      image: "", imageSolved: "",
-      hintType: "text", hintText: "Я на лестнице, поднимись!",
-      hintFoundText: "Ты меня уже нашёл!", hintAudio: ""
+      hintType: "text", hintText: "Подсказка для примера",
+      hintFoundText: "Ты меня нашёл!", hintAudio: "",
+      unavailableHint: ""
     }
   ];
 }
