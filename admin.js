@@ -508,10 +508,9 @@
 
   function summarizeParticipant(participant) {
     const characters = getEnabledCharacters();
-    const availableCharacters = characters.filter(isCharacterAvailable);
-    const found = availableCharacters.filter((ch) => participant.spots?.[ch.id]?.found).length;
-    const solved = availableCharacters.filter((ch) => participant.spots?.[ch.id]?.solved).length;
-    const completed = availableCharacters.filter((ch) => {
+    const found = characters.filter((ch) => participant.spots?.[ch.id]?.found).length;
+    const solved = characters.filter((ch) => participant.spots?.[ch.id]?.solved).length;
+    const completed = characters.filter((ch) => {
       const spot = participant.spots?.[ch.id];
       return spot?.found && (spot.solved || spot.attempts >= config.settings.maxAttempts);
     }).length;
@@ -522,9 +521,9 @@
       score: participant.score || 0,
       found,
       solved,
-      total: availableCharacters.length,
-      progress: availableCharacters.length ? Math.round((found / availableCharacters.length) * 100) : 100,
-      status: participant.status === "completed" || completed === availableCharacters.length ? "completed" : "active",
+      total: characters.length,
+      progress: characters.length ? Math.round((found / characters.length) * 100) : 100,
+      status: participant.status === "completed" || completed === characters.length ? "completed" : "active",
       startedAt: participant.startedAt || "",
       completedAt: participant.completedAt || ""
     };
@@ -536,8 +535,9 @@
     for (const character of config.characters) {
       const spot = participant.spots[character.id];
       if (!spot || !spot.found) continue;
-      const available = isCharacterAvailable(character);
-      if (character.enabled === false || !available) {
+      /* Only remove found status if admin disabled the character.
+         Weather/time changes should NOT remove found status. */
+      if (character.enabled === false) {
         participant.score -= Number(spot.score || character.foundPoints || 0);
         delete participant.spots[character.id];
         changed = true;

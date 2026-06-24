@@ -169,16 +169,16 @@
     }
   }
 
-  /** Remove found status from unavailable characters.
-   *  This fixes old data where characters were marked found despite being unavailable. */
+  /** Remove found status only from disabled characters.
+   *  Once a character is found, it stays found even if weather/time changes.
+   *  Only admin disabling (enabled=false) removes the found status. */
   function sanitizeState(participant) {
     if (!participant || !participant.spots) return participant;
     let changed = false;
     for (const character of config.characters) {
       const spot = participant.spots[character.id];
       if (!spot || !spot.found) continue;
-      const available = isCharacterAvailable(character);
-      if (character.enabled === false || !available) {
+      if (character.enabled === false) {
         participant.score -= Number(spot.score || character.foundPoints || 0);
         delete participant.spots[character.id];
         changed = true;
@@ -506,7 +506,7 @@
       const imageUrl = getCharacterImage(character, imgState);
 
       const pin = document.createElement("div");
-      pin.className = `map-pin ${found ? "is-found" : ""} ${solved ? "is-solved" : ""} ${!available ? "is-unavailable" : ""}`;
+      pin.className = `map-pin ${found ? "is-found" : ""} ${solved ? "is-solved" : ""} ${!found && !available ? "is-unavailable" : ""}`;
       pin.style.left = character.x + "%";
       pin.style.top = character.y + "%";
       pin.dataset.characterId = character.id;
@@ -530,7 +530,7 @@
         pin.appendChild(fallback);
       }
 
-      if (!available) {
+      if (!found && !available) {
         const icon = document.createElement("div");
         icon.className = "pin-unavailable-icon";
         icon.textContent = "⏱";
@@ -853,7 +853,7 @@
     renderAttemptsDots(spot, config.settings.maxAttempts);
     renderStatusPill(spot, character);
 
-    /* Disabled / unavailable characters — hide name */
+    /* Disabled characters — always blocked */
     if (character.enabled === false) {
       byId("character-name").textContent = "???";
       const hint = character.unavailableHint || "Этот персонаж временно не участвует в квесте.";
@@ -870,7 +870,8 @@
       return;
     }
 
-    if (!isCharacterAvailable(character)) {
+    /* Unavailable but already found — show normally (don't block) */
+    if (!isCharacterAvailable(character) && !spot.found) {
       byId("character-name").textContent = "???";
       let hint = character.unavailableHint || "Этот персонаж сейчас недоступен.";
       if (!character.unavailableHint) {
