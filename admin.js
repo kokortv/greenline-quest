@@ -362,6 +362,7 @@
   function summarizeParticipant(participant) {
     const characters = getEnabledCharacters();
     const availableCharacters = characters.filter(isCharacterAvailable);
+    console.log(`[admin-summarize] spots=`, JSON.stringify(participant.spots), `availableChars=`, availableCharacters.map(c => c.id));
     const found = availableCharacters.filter((ch) => participant.spots?.[ch.id]?.found).length;
     const solved = availableCharacters.filter((ch) => participant.spots?.[ch.id]?.solved).length;
     const completed = availableCharacters.filter((ch) => {

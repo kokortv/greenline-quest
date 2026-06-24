@@ -191,6 +191,7 @@
    *  This fixes old data where characters were marked found despite being unavailable. */
   function sanitizeState(participant) {
     if (!participant || !participant.spots) return participant;
+    console.log(`[sanitize] Checking spots:`, JSON.stringify(participant.spots));
     let changed = false;
     for (const character of config.characters) {
       const spot = participant.spots[character.id];
@@ -208,6 +209,8 @@
       participant.score = Math.max(0, participant.score);
       saveState(participant);
       console.log(`[sanitize] Saved updated state, score=${participant.score}`);
+    } else {
+      console.log(`[sanitize] No changes needed`);
     }
     return participant;
   }
