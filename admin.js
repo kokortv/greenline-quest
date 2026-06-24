@@ -25,26 +25,193 @@
     return;
   }
 
-  const fallbackConfig = window.HOTEL_QUEST_CONFIG;
-  const draft = loadConfig();
-
-  /* Merge: always preserve all fallback characters, overlay draft by id */
-  if (draft.characters && draft.characters.length > 0) {
-    const fallbackChars = fallbackConfig.characters || [];
-    const draftMap = new Map(draft.characters.map(ch => [ch.id, ch]));
-    const mergedCharacters = fallbackChars.map(fbChar => {
-      const draftChar = draftMap.get(fbChar.id);
-      return draftChar || fbChar;
-    });
-    const fallbackIds = new Set(fallbackChars.map(ch => ch.id));
-    draft.characters.forEach(ch => {
-      if (!fallbackIds.has(ch.id)) mergedCharacters.push(ch);
-    });
-    draft.characters = mergedCharacters;
-  } else {
-    draft.characters = fallbackConfig.characters || [];
+  /* === Default config for first-time seeding === */
+  function getDefaultSettings() {
+    return {
+      currentWeather: "sun",
+      maxAttempts: 3,
+      finishTitle: "Все хранители найдены",
+      finishSuccess: "Отличный результат! Вы собрали всех хранителей отеля.",
+      finishSupport: "Квест завершен. Не все загадки покорились, но коллекция собрана.",
+      nameBlockList: [
+        "дурак", "идиот", "бред", "test", "asdf", "qwerty",
+        "хуй", "хуила", "хуёк", "хуя", "пидор", "пидар", "пидр",
+        "педик", "педрил", "ебан", "ебать", "ебла", "ебуч",
+        "бля", "бляд", "бляди", "срать", "сран", "гандон", "гондон",
+        "гавно", "говн", "мудак", "мудил", "залуп", "дроч",
+        "пизда", "пизд", "сука", "сук", "уёб", "урод", "дерьм",
+        "лох", "чмо", "жопа", "попа", "задница", "хрен",
+        "fuck", "shit", "bitch", "ass", "dick", "cunt", "crap",
+        "bastard", "damn", "whore", "slut", "fag", "moron", "retard"
+      ],
+      prizeInfo: "",
+      registrationWarning: "",
+      primaryColor: "#29771e",
+      logoUrl: "",
+      roomDigits: 3,
+      scanHint: ""
+    };
   }
-  const config = draft;
+
+  function getDefaultCharacters() {
+    return [
+      {
+        id: "lobby",
+        name: "Люмен",
+        color: "#2364aa",
+        x: 50,
+        y: 20,
+        enabled: true,
+        active: true,
+        weatherRule: "any",
+        availableFrom: "",
+        availableTo: "",
+        foundPoints: 10,
+        attemptPoints: [30, 20, 10],
+        riddle: "Я встречаю гостей первым, храню ключи и улыбки. Где я?",
+        answers: ["ресепшен", "reception", "стойка регистрации", "лобби"],
+        image: "",
+        imageSolved: "",
+        hintType: "text",
+        hintText: "Я в лобби, подойди ко мне!",
+        hintFoundText: "Ты уже встретил меня!",
+        hintAudio: ""
+      },
+      {
+        id: "cafe",
+        name: "Мира",
+        color: "#d1663f",
+        x: 26,
+        y: 43,
+        enabled: true,
+        active: true,
+        weatherRule: "any",
+        availableFrom: "",
+        availableTo: "",
+        foundPoints: 10,
+        attemptPoints: [30, 20, 10],
+        riddle: "Здесь утро пахнет кофе, а разговоры становятся теплее за маленьким столиком.",
+        answers: ["кафе", "coffee", "кофе", "кофейня"],
+        image: "",
+        imageSolved: "",
+        hintType: "text",
+        hintText: "Я в кафе, загляни туда!",
+        hintFoundText: "Ты меня уже нашёл!",
+        hintAudio: ""
+      },
+      {
+        id: "pool",
+        name: "Ори",
+        color: "#2a8c82",
+        x: 74,
+        y: 43,
+        enabled: true,
+        active: true,
+        weatherRule: "sun",
+        availableFrom: "",
+        availableTo: "",
+        foundPoints: 10,
+        attemptPoints: [30, 20, 10],
+        riddle: "Я отражаю потолок, шепчу водой и жду тех, кто хочет поплавать.",
+        answers: ["бассейн", "pool", "вода"],
+        image: "",
+        imageSolved: "",
+        hintType: "text",
+        hintText: "Я у бассейна, приходи в солнечный день!",
+        hintFoundText: "Ты меня уже нашёл!",
+        hintAudio: "",
+        unavailableHint: "Я появляюсь только в солнечную погоду. Приходи, когда будет солнце!"
+      },
+      {
+        id: "garden",
+        name: "Флора",
+        color: "#6f8f3d",
+        x: 28,
+        y: 76,
+        enabled: true,
+        active: true,
+        weatherRule: "rain",
+        availableFrom: "",
+        availableTo: "",
+        foundPoints: 10,
+        attemptPoints: [30, 20, 10],
+        riddle: "Здесь слышны листья, пахнет землей, а дорожка ведет между зеленью.",
+        answers: ["сад", "garden", "двор", "зелень"],
+        image: "",
+        imageSolved: "",
+        hintType: "text",
+        hintText: "Я в саду, иди под дождём!",
+        hintFoundText: "Ты меня уже нашёл!",
+        hintAudio: "",
+        unavailableHint: "Я появляюсь только в дождливую погоду. Приходи, когда пойдёт дождь!"
+      },
+      {
+        id: "stairs",
+        name: "Степ",
+        color: "#7a5cba",
+        x: 72,
+        y: 76,
+        enabled: true,
+        active: true,
+        weatherRule: "any",
+        availableFrom: "",
+        availableTo: "",
+        foundPoints: 10,
+        attemptPoints: [30, 20, 10],
+        riddle: "Я не лифт, но тоже поднимаю выше. Мои ступени знают путь между этажами.",
+        answers: ["лестница", "stairs", "ступени"],
+        image: "",
+        imageSolved: "",
+        hintType: "text",
+        hintText: "Я на лестнице, поднимись!",
+        hintFoundText: "Ты меня уже нашёл!",
+        hintAudio: ""
+      }
+    ];
+  }
+
+  function getDefaultConfig() {
+    return {
+      sheetEndpoint: window.HOTEL_QUEST_CONFIG ? window.HOTEL_QUEST_CONFIG.sheetEndpoint : "",
+      hotelName: "Green Line Batumi",
+      settings: getDefaultSettings(),
+      rooms: ["101", "102", "103", "104", "201", "202", "203", "204", "301", "302", "303", "304"],
+      characters: getDefaultCharacters()
+    };
+  }
+
+  /* === Load config: localStorage draft → Sheets → default seed === */
+  let config;
+
+  function loadConfig() {
+    try {
+      const draft = localStorage.getItem(draftKey);
+      if (draft) {
+        const parsed = JSON.parse(draft);
+        /* Ensure it has the expected structure */
+        if (!parsed.settings) parsed.settings = getDefaultSettings();
+        if (!parsed.characters) parsed.characters = [];
+        return parsed;
+      }
+    } catch (error) {
+      /* ignore parse errors */
+    }
+    return null;
+  }
+
+  const savedConfig = loadConfig();
+  if (savedConfig && savedConfig.characters && savedConfig.characters.length > 0) {
+    config = savedConfig;
+  } else {
+    /* First load: seed default config */
+    config = getDefaultConfig();
+    localStorage.setItem(draftKey, JSON.stringify(config));
+  }
+
+  /* Ensure sheetEndpoint from config.js is always available */
+  if (window.HOTEL_QUEST_CONFIG && window.HOTEL_QUEST_CONFIG.sheetEndpoint) {
+    config.sheetEndpoint = window.HOTEL_QUEST_CONFIG.sheetEndpoint;
+  }
 
   /* Fix old pixel-based coordinates (x>100 or y>100) by clamping to percentages */
   if (config.characters) {
@@ -59,12 +226,27 @@
   let mapContainer = null;
   let dragData = null;
 
-  function loadConfig() {
+  /* Try to load config from Sheets on startup */
+  async function loadRemoteConfig() {
+    if (!config.sheetEndpoint) return;
     try {
-      const draft = localStorage.getItem(draftKey);
-      return draft ? JSON.parse(draft) : structuredClone(window.HOTEL_QUEST_CONFIG);
+      const response = await fetch(`${config.sheetEndpoint}?action=config`);
+      const remoteSettings = await response.json();
+      if (remoteSettings && remoteSettings.settings) {
+        config.settings = { ...config.settings, ...remoteSettings.settings };
+      }
+
+      /* Also load characters from separate endpoint */
+      const charsResponse = await fetch(`${config.sheetEndpoint}?action=characters`);
+      const charsData = await charsResponse.json();
+      if (charsData && Array.isArray(charsData.characters) && charsData.characters.length > 0) {
+        config.characters = charsData.characters;
+      }
+
+      localStorage.setItem(draftKey, JSON.stringify(config));
+      render();
     } catch (error) {
-      return structuredClone(window.HOTEL_QUEST_CONFIG);
+      /* Silently fail — use local config */
     }
   }
 
@@ -100,6 +282,7 @@
       button.classList.toggle("is-active", button.dataset.adminTab === name);
     });
     byId("settings-panel").hidden = name !== "settings";
+    byId("characters-panel").hidden = name !== "characters";
     byId("players-panel").hidden = name !== "players";
     byId("map-panel").hidden = name !== "map";
     if (name === "players") renderPlayers();
@@ -112,7 +295,7 @@
     list.innerHTML = "";
 
     if (!config.characters || !config.characters.length) {
-      list.innerHTML = "<p style='color:var(--muted);'>Нет персонажей. Добавьте нового.</p>";
+      list.innerHTML = "<p style='color:var(--muted);'>Нет персонажей. Нажмите «Добавить персонажа».</p>";
       return;
     }
 
@@ -131,6 +314,8 @@
         } else {
           input.value = value ?? "";
         }
+        /* ID field is read-only — don't attach update listeners */
+        if (field === "id") return;
         input.addEventListener("input", () => updateCharacter(index, field, input.value));
         input.addEventListener("change", () => updateCharacter(index, field, input.value));
       });
@@ -152,7 +337,6 @@
           const reader = new FileReader();
           reader.onload = (ev) => {
             const dataUrl = ev.target.result;
-            /* Determine which field to update based on the file input name */
             const targetField = field === "imageSolvedFile" ? "imageSolved" : "image";
             character[targetField] = dataUrl;
             const preview = node.querySelector(`[data-preview="${targetField}"]`);
@@ -179,11 +363,9 @@
         qrUrl.textContent = fullUrl;
         qrUrl.title = fullUrl;
 
-        /* Generate QR */
         try {
           QRCodeDraw.drawToCanvas(fullUrl, qrCanvas, 4);
         } catch (e) {
-          /* Fallback: show text if QR fails */
           const ctx = qrCanvas.getContext("2d");
           ctx.fillStyle = "#eef2f3";
           ctx.fillRect(0, 0, 160, 160);
@@ -193,7 +375,6 @@
           ctx.fillText("QR error", 80, 85);
         }
 
-        /* Copy URL */
         const copyUrl = () => {
           if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(fullUrl).then(() => {
@@ -215,20 +396,17 @@
         qrUrl.addEventListener("click", copyUrl);
         qrCopyBtn.addEventListener("click", copyUrl);
 
-        /* Generate high-res QR canvas (returns Promise) */
         const makeHiResQR = () => {
           return new Promise((resolve) => {
             const dlCanvas = document.createElement("canvas");
             try {
               QRCodeDraw.drawToCanvas(fullUrl, dlCanvas, 10);
-              /* Check if canvas actually has content (not 0x0) */
               if (dlCanvas.width > 0 && dlCanvas.height > 0) {
                 resolve(dlCanvas);
                 return;
               }
             } catch (e) { /* fallback below */ }
 
-            /* API fallback for long URLs */
             const img = new Image();
             img.crossOrigin = "anonymous";
             img.onload = () => {
@@ -242,7 +420,6 @@
           });
         };
 
-        /* Download QR as PNG */
         qrDownloadBtn.addEventListener("click", async () => {
           const dlCanvas = await makeHiResQR();
           if (!dlCanvas) return;
@@ -252,7 +429,6 @@
           link.click();
         });
 
-        /* Open QR in new tab */
         qrOpenBtn.addEventListener("click", async () => {
           const dlCanvas = await makeHiResQR();
           if (!dlCanvas) return;
@@ -264,8 +440,23 @@
         });
       }
 
+      /* Delete button */
+      const deleteBtn = node.querySelector('[data-action="delete-character"]');
+      if (deleteBtn) {
+        deleteBtn.addEventListener("click", () => deleteCharacter(index));
+      }
+
       list.appendChild(node);
     });
+  }
+
+  function deleteCharacter(index) {
+    const character = config.characters[index];
+    if (!character) return;
+    if (!confirm(`Удалить персонажа «${character.name || character.id}»? Это действие нельзя отменить.`)) return;
+    config.characters.splice(index, 1);
+    renderCharacters();
+    renderAdminMap();
   }
 
   function updateCharacter(index, field, value) {
@@ -315,12 +506,30 @@
 
     if (!config.sheetEndpoint) return;
     try {
+      /* Save settings to config sheet */
       await fetch(config.sheetEndpoint, {
         method: "POST",
         mode: "no-cors",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ type: "config_update", sentAt: new Date().toISOString(), payload: config })
+        body: JSON.stringify({
+          type: "config_update",
+          sentAt: new Date().toISOString(),
+          payload: { settings: config.settings, rooms: config.rooms }
+        })
       });
+
+      /* Save characters to characters sheet */
+      await fetch(config.sheetEndpoint, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          type: "characters_update",
+          sentAt: new Date().toISOString(),
+          payload: { characters: config.characters }
+        })
+      });
+
       byId("admin-status").textContent = "Настройки сохранены и отправлены в Sheets.";
     } catch (error) {
       byId("admin-status").textContent = "Демо сохранено, но отправка в Sheets не удалась.";
@@ -350,7 +559,6 @@
     const inRange = fromMinutes <= toMinutes
       ? nowMinutes >= fromMinutes && nowMinutes <= toMinutes
       : nowMinutes >= fromMinutes || nowMinutes <= toMinutes;
-    console.log(`[admin-availability] ${character.name}: from=${character.availableFrom}(${fromMinutes}) to=${character.availableTo}(${toMinutes}) now=${nowMinutes} inRange=${inRange}`);
     return inRange;
   }
 
@@ -362,7 +570,6 @@
   function summarizeParticipant(participant) {
     const characters = getEnabledCharacters();
     const availableCharacters = characters.filter(isCharacterAvailable);
-    console.log(`[admin-summarize] spots=`, JSON.stringify(participant.spots), `availableChars=`, availableCharacters.map(c => c.id));
     const found = availableCharacters.filter((ch) => participant.spots?.[ch.id]?.found).length;
     const solved = availableCharacters.filter((ch) => participant.spots?.[ch.id]?.solved).length;
     const completed = availableCharacters.filter((ch) => {
@@ -399,7 +606,6 @@
     }
     if (changed) {
       participant.score = Math.max(0, participant.score);
-      /* Save sanitized data back to localStorage so it persists */
       try {
         localStorage.setItem(participantKey, JSON.stringify(participant));
       } catch (e) { /* ignore */ }
@@ -432,7 +638,6 @@
       localStorage.setItem(participantKey, JSON.stringify(participant));
     }
 
-    /* Also reset in Sheets if endpoint is configured */
     if (config.sheetEndpoint) {
       fetch(config.sheetEndpoint, {
         method: "POST",
@@ -462,7 +667,6 @@
       localStorage.removeItem(participantKey);
     }
 
-    /* Also delete from Sheets if endpoint is configured */
     if (config.sheetEndpoint) {
       fetch(config.sheetEndpoint, {
         method: "POST",
@@ -593,7 +797,7 @@
 
   function addCharacter() {
     config.characters.push({
-      id: `new-${Date.now()}`,
+      id: `char-${Date.now()}`,
       name: "Новый персонаж",
       color: "#2364aa",
       x: 50,
@@ -608,6 +812,7 @@
       riddle: "",
       answers: [],
       image: "",
+      imageSolved: "",
       hintType: "text",
       hintText: "Нажми на меня, я подскажу!",
       hintFoundText: "Ты уже нашёл меня!",
@@ -673,11 +878,9 @@
 
     const rect = mapContainer.getBoundingClientRect();
 
-    // Получаем текущие координаты пина в пикселях
     const pinLeftPx = (character.x / 100) * rect.width;
     const pinTopPx = (character.y / 100) * rect.height;
 
-    // Смещение от центра пина (пин позиционирован через translate(-50%, -50%))
     const pinCenterX = rect.left + pinLeftPx;
     const pinCenterY = rect.top + pinTopPx;
 
@@ -723,15 +926,12 @@
     const { pin, character, offsetX, offsetY } = dragData;
     const rect = mapContainer.getBoundingClientRect();
 
-    // Вычисляем позицию центра пина
     const xPx = clientX - rect.left - offsetX;
     const yPx = clientY - rect.top - offsetY;
 
-    // Переводим в проценты
     let x = (xPx / rect.width) * 100;
     let y = (yPx / rect.height) * 100;
 
-    // Ограничиваем
     x = Math.max(0, Math.min(100, x));
     y = Math.max(0, Math.min(100, y));
 
@@ -795,4 +995,5 @@
   });
 
   render();
+  loadRemoteConfig();
 })();

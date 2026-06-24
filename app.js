@@ -1,5 +1,5 @@
 (function () {
-  const fallbackConfig = window.HOTEL_QUEST_CONFIG;
+  const cfgRef = window.HOTEL_QUEST_CONFIG || {};
   const storageKey = "hotelQuestParticipant";
   const queueKey = "hotelQuestSyncQueue";
   const adminDraftKey = "hotelQuestAdminDraft";
@@ -9,20 +9,16 @@
   const resetParam = urlParams.get("reset");
   if (resetParam !== null) {
     if (resetParam === "" || resetParam === "all") {
-      /* Full reset: clear everything */
       localStorage.removeItem(storageKey);
       localStorage.removeItem(adminDraftKey);
       localStorage.removeItem(queueKey);
       localStorage.removeItem("hotelQuestDeviceId");
     } else if (resetParam === "progress") {
-      /* Only reset player progress, keep admin config */
       localStorage.removeItem(storageKey);
       localStorage.removeItem(queueKey);
     } else if (resetParam === "config") {
-      /* Only reset admin draft, keep player progress */
       localStorage.removeItem(adminDraftKey);
     }
-    /* Remove ?reset from URL and hard-reload (bypass cache) */
     urlParams.delete("reset");
     const cleanUrl = urlParams.toString()
       ? window.location.pathname + "?" + urlParams.toString() + "&_t=" + Date.now()
@@ -31,26 +27,24 @@
     return;
   }
 
-  /* Merge admin draft with fallback — always preserve all fallback characters */
+  /* === Load config entirely from localStorage draft === */
   const draft = readAdminDraft();
   let config;
   if (draft && draft.characters && draft.characters.length > 0) {
-    /* Merge: start from fallback characters, then overlay draft characters by id */
-    const fallbackChars = fallbackConfig.characters || [];
-    const draftMap = new Map(draft.characters.map(ch => [ch.id, ch]));
-    /* For each fallback character: use draft version if exists, otherwise keep fallback */
-    const mergedCharacters = fallbackChars.map(fbChar => {
-      const draftChar = draftMap.get(fbChar.id);
-      return draftChar || fbChar;
-    });
-    /* Also include any NEW characters from draft that aren't in fallback */
-    const fallbackIds = new Set(fallbackChars.map(ch => ch.id));
-    draft.characters.forEach(ch => {
-      if (!fallbackIds.has(ch.id)) mergedCharacters.push(ch);
-    });
-    config = normalizeConfig({ ...draft, characters: mergedCharacters });
+    config = normalizeConfig(draft);
   } else {
-    config = normalizeConfig(fallbackConfig);
+    /* No draft or no characters — use minimal default (no characters, user must set up via admin) */
+    config = normalizeConfig({
+      sheetEndpoint: cfgRef.sheetEndpoint || "",
+      settings: getDefaultSettings(),
+      rooms: [],
+      characters: []
+    });
+  }
+
+  /* Ensure sheetEndpoint from config.js is always available */
+  if (cfgRef.sheetEndpoint) {
+    config.sheetEndpoint = cfgRef.sheetEndpoint;
   }
 
   /* Fix old pixel-based coordinates (x>100 or y>100) by clamping to percentages */
@@ -81,20 +75,36 @@
     }
   }
 
-  function normalizeConfig(raw) {
-    const settings = {
+  function getDefaultSettings() {
+    return {
       currentWeather: "sun",
       maxAttempts: 3,
       finishTitle: "Все хранители найдены",
       finishSuccess: "Отличный результат! Вы собрали всех хранителей отеля.",
       finishSupport: "Квест завершен. Не все загадки покорились, но коллекция собрана.",
-      nameBlockList: [],
+      nameBlockList: [
+        "дурак", "идиот", "бред", "test", "asdf", "qwerty",
+        "хуй", "хуила", "хуёк", "хуя", "пидор", "пидар", "пидр",
+        "педик", "педрил", "ебан", "ебать", "ебла", "ебуч",
+        "бля", "бляд", "бляди", "срать", "сран", "гандон", "гондон",
+        "гавно", "говн", "мудак", "мудил", "залуп", "дроч",
+        "пизда", "пизд", "сука", "сук", "уёб", "урод", "дерьм",
+        "лох", "чмо", "жопа", "попа", "задница", "хрен",
+        "fuck", "shit", "bitch", "ass", "dick", "cunt", "crap",
+        "bastard", "damn", "whore", "slut", "fag", "moron", "retard"
+      ],
       prizeInfo: "",
       registrationWarning: "",
       primaryColor: "#29771e",
       logoUrl: "",
       roomDigits: 3,
-      scanHint: "",
+      scanHint: ""
+    };
+  }
+
+  function normalizeConfig(raw) {
+    const settings = {
+      ...getDefaultSettings(),
       ...(raw.settings || {})
     };
 
@@ -126,53 +136,25 @@
   async function loadRemoteConfig() {
     if (!config.sheetEndpoint) return;
     try {
-      const response = await fetch(`${config.sheetEndpoint}?action=config`);
-      const remote = await response.json();
-      if (remote && remote.characters) {
-        /* Always keep at least as many characters as the fallback config.
-           Remote config may be stale with fewer characters. */
-        const localCount = config.characters.length;
-        const remoteCount = remote.characters.length;
-        if (remoteCount < localCount) {
-          /* Remote has fewer — keep local characters, only merge settings */
-          const merged = { ...remote, characters: config.characters };
-          if (remote.settings) {
-            merged.settings = { ...config.settings, ...remote.settings };
-          }
-          config = normalizeConfig(merged);
-        } else {
-          /* Merge characters: for each character, start from remote but keep
-             local availability fields (availableFrom, availableTo, weatherRule, active, enabled)
-             if remote has empty/default values — so admin time/weather restrictions are preserved */
-          const localCharMap = new Map(config.characters.map(ch => [ch.id, ch]));
-          const availabilityFields = ["availableFrom", "availableTo", "weatherRule", "active", "enabled"];
-          const mergedCharacters = remote.characters.map(remoteChar => {
-            const localChar = localCharMap.get(remoteChar.id);
-            if (!localChar) return remoteChar;
-            const merged = { ...remoteChar };
-            for (const field of availabilityFields) {
-              const localVal = localChar[field];
-              const remoteVal = remoteChar[field];
-              /* If remote is empty/missing but local has a real value, keep local */
-              if ((remoteVal === "" || remoteVal === undefined || remoteVal === null) && localVal !== "" && localVal !== undefined && localVal !== null) {
-                merged[field] = localVal;
-              }
-            }
-            return merged;
-          });
-          /* Also keep any local characters not in remote */
-          const remoteIds = new Set(remote.characters.map(ch => ch.id));
-          localCharMap.forEach((ch, id) => {
-            if (!remoteIds.has(id)) mergedCharacters.push(ch);
-          });
-          config = normalizeConfig({ ...remote, characters: mergedCharacters });
-        }
-        applyDynamicSettings();
-        /* Re-sanitize state: weather or config may have changed, making some characters unavailable */
-        const p = getParticipant();
-        if (p) sanitizeState(p);
-        renderCurrentState();
+      /* Load settings from config endpoint */
+      const settingsResponse = await fetch(`${config.sheetEndpoint}?action=config`);
+      const remoteSettings = await settingsResponse.json();
+      if (remoteSettings && remoteSettings.settings) {
+        config.settings = { ...config.settings, ...remoteSettings.settings };
       }
+
+      /* Load characters from characters endpoint */
+      const charsResponse = await fetch(`${config.sheetEndpoint}?action=characters`);
+      const charsData = await charsResponse.json();
+      if (charsData && Array.isArray(charsData.characters) && charsData.characters.length > 0) {
+        config = normalizeConfig({ ...config, characters: charsData.characters });
+      }
+
+      applyDynamicSettings();
+      /* Re-sanitize state: weather or config may have changed */
+      const p = getParticipant();
+      if (p) sanitizeState(p);
+      renderCurrentState();
     } catch (error) {
       queueEvent("config_load_failed", { message: error.message });
     }
@@ -191,15 +173,12 @@
    *  This fixes old data where characters were marked found despite being unavailable. */
   function sanitizeState(participant) {
     if (!participant || !participant.spots) return participant;
-    console.log(`[sanitize] Checking spots:`, JSON.stringify(participant.spots));
     let changed = false;
     for (const character of config.characters) {
       const spot = participant.spots[character.id];
       if (!spot || !spot.found) continue;
       const available = isCharacterAvailable(character);
       if (character.enabled === false || !available) {
-        /* Remove the found status and reverse the score */
-        console.log(`[sanitize] Removing found for ${character.name} (enabled=${character.enabled}, available=${available}, from=${character.availableFrom}, to=${character.availableTo})`);
         participant.score -= Number(spot.score || character.foundPoints || 0);
         delete participant.spots[character.id];
         changed = true;
@@ -208,9 +187,6 @@
     if (changed) {
       participant.score = Math.max(0, participant.score);
       saveState(participant);
-      console.log(`[sanitize] Saved updated state, score=${participant.score}`);
-    } else {
-      console.log(`[sanitize] No changes needed`);
     }
     return participant;
   }
@@ -304,8 +280,6 @@
     } else {
       title.textContent = "Карта поиска";
     }
-
-    /* Back button removed — use map chip instead */
 
     /* Profile button: hide when already on profile */
     byId("profile-button").hidden = name === "profile";
@@ -473,7 +447,6 @@
     const inRange = from <= to
       ? minutes >= from && minutes <= to
       : minutes >= from || minutes <= to;
-    console.log(`[availability] ${character.name}: from=${character.availableFrom} to=${character.availableTo} now=${minutes} inRange=${inRange}`);
     return inRange;
   }
 
@@ -752,10 +725,8 @@
   function revealCharacter(participant, character) {
     /* Safety check: never reveal an unavailable character */
     if (!isCharacterAvailable(character)) {
-      console.log(`[reveal] BLOCKED: ${character.name} is not available, availableFrom=${character.availableFrom} availableTo=${character.availableTo} active=${character.active} enabled=${character.enabled} weatherRule=${character.weatherRule} currentWeather=${config.settings.currentWeather}`);
       return;
     }
-    console.log(`[reveal] ALLOWED: ${character.name}`);
 
     if (!participant.spots[character.id]) {
       participant.spots[character.id] = {

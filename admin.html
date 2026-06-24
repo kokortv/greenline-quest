@@ -256,6 +256,28 @@
           z-index: 100;
           cursor: grabbing;
         }
+        .character-delete-btn {
+          min-height: 36px;
+          padding: 0 14px;
+          border: 1px solid #b94d3e;
+          border-radius: 6px;
+          background: #fffdf7;
+          color: #b94d3e;
+          font-weight: 700;
+          font-size: 0.85rem;
+          cursor: pointer;
+          justify-self: end;
+        }
+        .character-delete-btn:hover {
+          background: #b94d3e;
+          color: #fff;
+        }
+        .characters-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 12px;
+        }
         @media (max-width: 560px) {
           .admin-header {
                 display: grid;
@@ -304,16 +326,17 @@
     </div>
     <div class="admin-actions">
       <button class="primary" id="save-admin" type="button">Сохранить</button>
-      <button class="secondary" id="add-character" type="button">Добавить персонажа</button>
     </div>
   </header>
 
   <nav class="admin-tabs" aria-label="Разделы админки">
     <button class="admin-tab is-active" data-admin-tab="settings" type="button">Настройки</button>
-    <button class="admin-tab" data-admin-tab="map" type="button">Редактор карты</button>
+    <button class="admin-tab" data-admin-tab="characters" type="button">Персонажи</button>
+    <button class="admin-tab" data-admin-tab="map" type="button">Карта</button>
     <button class="admin-tab" data-admin-tab="players" type="button">Игроки</button>
   </nav>
 
+  <!-- Настройки — только общие настройки, без персонажей -->
   <section class="admin-grid admin-panel" id="settings-panel">
     <div class="admin-section">
       <h2>Общие настройки</h2>
@@ -384,14 +407,23 @@
       </div>
     </div>
 
-    <div class="admin-section">
-      <h2>Персонажи</h2>
-      <div class="editor-list" id="characters-editor"></div>
-    </div>
-
     <p class="admin-status" id="admin-status" role="status"></p>
   </section>
 
+  <!-- Персонажи — редактор списка персонажей -->
+  <section class="admin-grid admin-panel" id="characters-panel" hidden>
+    <div class="admin-section">
+      <div class="characters-header">
+        <h2>Персонажи</h2>
+        <button class="secondary" id="add-character" type="button">Добавить персонажа</button>
+      </div>
+      <div class="editor-list" id="characters-editor"></div>
+    </div>
+
+    <p class="admin-status" id="characters-status" role="status"></p>
+  </section>
+
+  <!-- Карта -->
   <section class="admin-grid admin-panel" id="map-panel" hidden>
     <div class="admin-section">
       <h2>Редактор карты</h2>
@@ -406,6 +438,7 @@
     </div>
   </section>
 
+  <!-- Игроки -->
   <section class="admin-grid admin-panel" id="players-panel" hidden>
     <div class="admin-section">
       <div class="admin-header">
@@ -428,7 +461,7 @@
     <div class="form-grid">
       <label>Включен<select data-field="enabled"><option value="true">Да</option><option value="false">Нет</option></select></label>
       <label>Активен<select data-field="active"><option value="true">Да</option><option value="false">Нет</option></select></label>
-      <label>ID<input data-field="id" /></label>
+      <label>ID<input data-field="id" disabled readonly style="opacity:0.6;cursor:not-allowed;" /><span class="hint-text">Генерируется автоматически</span></label>
       <label>Имя<input data-field="name" /></label>
       <label>Цвет<input data-field="color" type="color" /></label>
       <label>X<input data-field="x" inputmode="numeric" /></label>
@@ -511,6 +544,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Кнопка удаления персонажа -->
+    <button class="character-delete-btn" data-action="delete-character" type="button">Удалить персонажа</button>
   </article>
 </template>
 

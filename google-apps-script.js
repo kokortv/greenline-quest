@@ -3,9 +3,10 @@
  * Google Apps Script (вставить в Расширения → Apps Script таблицы)
  *
  * Листы таблицы:
- *   1. "config"     — A1:JSON  (весь конфиг одним JSON-объектом)
- *   2. "events"     — timestamp | type | participantId | data
- *   3. "players"    — id | name | room | score | found | solved | total | progress | status | lastActivity
+ *   1. "config"     — A1:JSON  (только настройки, без персонажей)
+ *   2. "characters" — A1:JSON  (массив персонажей)
+ *   3. "events"     — timestamp | type | participantId | data
+ *   4. "players"    — id | name | room | score | found | solved | total | progress | status | lastActivity
  *
  * После вставки скрипта:
  *   1. Деплой → Новый деплой → Тип: Web App
@@ -16,6 +17,7 @@
 
 /* ================================================================
    CONFIG SHEET — хранит один JSON в ячейке A1 листа "config"
+   Содержит ТОЛЬКО настройки (settings), без персонажей
    ================================================================ */
 
 function getConfigSheet() {
@@ -27,114 +29,151 @@ function ensureConfigSheet() {
   var sheet = ss.getSheetByName("config");
   if (!sheet) {
     sheet = ss.insertSheet("config");
-    sheet.getRange("A1").setValue(JSON.stringify(getDefaultConfig(), null, 2));
+    sheet.getRange("A1").setValue(JSON.stringify(getDefaultSettings(), null, 2));
   }
   return sheet;
 }
 
 function readConfig() {
   var sheet = getConfigSheet();
-  if (!sheet) return getDefaultConfig();
+  if (!sheet) return getDefaultSettings();
   var val = sheet.getRange("A1").getValue();
-  if (!val) return getDefaultConfig();
+  if (!val) return getDefaultSettings();
   try {
     return JSON.parse(val);
   } catch (e) {
-    return getDefaultConfig();
+    return getDefaultSettings();
   }
 }
 
-function writeConfig(cfg) {
+function writeConfig(settings) {
   var sheet = getConfigSheet();
   if (!sheet) sheet = ensureConfigSheet();
-  sheet.getRange("A1").setValue(JSON.stringify(cfg, null, 2));
+  sheet.getRange("A1").setValue(JSON.stringify(settings, null, 2));
 }
 
-function getDefaultConfig() {
+function getDefaultSettings() {
   return {
-    sheetEndpoint: "",
-    hotelName: "Green Line Batumi",
-    settings: {
-      currentWeather: "sun",
-      maxAttempts: 3,
-      finishTitle: "Все хранители найдены",
-      finishSuccess: "Отличный результат! Вы собрали всех хранителей отеля.",
-      finishSupport: "Квест завершен. Не все загадки покорились, но коллекция собрана.",
-      nameBlockList: ["дурак", "идиот", "бред", "test", "asdf", "qwerty",
-        "хуй", "хуила", "хуёк", "хуя", "пидор", "пидар", "пидр",
-        "педик", "педрил", "ебан", "ебать", "ебла", "ебуч",
-        "бля", "бляд", "бляди", "срать", "сран", "гандон", "гондон",
-        "гавно", "говн", "мудак", "мудил", "залуп", "дроч",
-        "пизда", "пизд", "сука", "сук", "уёб", "урод", "дерьм",
-        "лох", "чмо", "жопа", "попа", "задница", "хрен",
-        "fuck", "shit", "bitch", "ass", "dick", "cunt", "crap",
-        "bastard", "damn", "whore", "slut", "fag", "moron", "retard"],
-      prizeInfo: "",
-      registrationWarning: "",
-      primaryColor: "#29771e",
-      logoUrl: "",
-      roomDigits: 3,
-      scanHint: ""
-    },
-    rooms: ["101", "102", "103", "104", "201", "202", "203", "204", "301", "302", "303", "304"],
-    characters: [
-      {
-        id: "lobby", name: "Люмен", place: "Лобби", color: "#2364aa",
-        x: 50, y: 20, enabled: true, active: true, weatherRule: "any",
-        availableFrom: "", availableTo: "",
-        foundPoints: 10, attemptPoints: [30, 20, 10],
-        riddle: "Я встречаю гостей первым, храню ключи и улыбки. Где я?",
-        answers: ["ресепшен", "reception", "стойка регистрации", "лобби"],
-        image: "", imageSolved: "",
-        hintType: "text", hintText: "Я в лобби, подойди ко мне!",
-        hintFoundText: "Ты уже встретил меня!", hintAudio: ""
-      },
-      {
-        id: "cafe", name: "Мира", place: "Кафе", color: "#d1663f",
-        x: 26, y: 43, enabled: true, active: true, weatherRule: "any",
-        availableFrom: "", availableTo: "",
-        foundPoints: 10, attemptPoints: [30, 20, 10],
-        riddle: "Здесь утро пахнет кофе, а разговоры становятся теплее за маленьким столиком.",
-        answers: ["кафе", "coffee", "кофе", "кофейня"],
-        image: "", imageSolved: "",
-        hintType: "text", hintText: "Я в кафе, загляни туда!",
-        hintFoundText: "Ты меня уже нашёл!", hintAudio: ""
-      },
-      {
-        id: "pool", name: "Ори", place: "Бассейн", color: "#2a8c82",
-        x: 74, y: 43, enabled: true, active: true, weatherRule: "sun",
-        availableFrom: "", availableTo: "",
-        foundPoints: 10, attemptPoints: [30, 20, 10],
-        riddle: "Я отражаю потолок, шепчу водой и жду тех, кто хочет поплавать.",
-        answers: ["бассейн", "pool", "вода"],
-        image: "", imageSolved: "",
-        hintType: "text", hintText: "Я у бассейна, приходи в солнечный день!",
-        hintFoundText: "Ты меня уже нашёл!", hintAudio: ""
-      },
-      {
-        id: "garden", name: "Флора", place: "Сад", color: "#6f8f3d",
-        x: 28, y: 76, enabled: true, active: true, weatherRule: "rain",
-        availableFrom: "", availableTo: "",
-        foundPoints: 10, attemptPoints: [30, 20, 10],
-        riddle: "Здесь слышны листья, пахнет землей, а дорожка ведет между зеленью.",
-        answers: ["сад", "garden", "двор", "зелень"],
-        image: "", imageSolved: "",
-        hintType: "text", hintText: "Я в саду, иди под дождём!",
-        hintFoundText: "Ты меня уже нашёл!", hintAudio: ""
-      },
-      {
-        id: "stairs", name: "Степ", place: "Лестница", color: "#7a5cba",
-        x: 72, y: 76, enabled: true, active: true, weatherRule: "any",
-        availableFrom: "", availableTo: "",
-        foundPoints: 10, attemptPoints: [30, 20, 10],
-        riddle: "Я не лифт, но тоже поднимааю выше. Мои ступени знают путь между этажами.",
-        answers: ["лестница", "stairs", "ступени"],
-        image: "", imageSolved: "",
-        hintType: "text", hintText: "Я на лестнице, поднимись!",
-        hintFoundText: "Ты меня уже нашёл!", hintAudio: ""
-      }
-    ]
+    currentWeather: "sun",
+    maxAttempts: 3,
+    finishTitle: "Все хранители найдены",
+    finishSuccess: "Отличный результат! Вы собрали всех хранителей отеля.",
+    finishSupport: "Квест завершен. Не все загадки покорились, но коллекция собрана.",
+    nameBlockList: ["дурак", "идиот", "бред", "test", "asdf", "qwerty",
+      "хуй", "хуила", "хуёк", "хуя", "пидор", "пидар", "пидр",
+      "педик", "педрил", "ебан", "ебать", "ебла", "ебуч",
+      "бля", "бляд", "бляди", "срать", "сран", "гандон", "гондон",
+      "гавно", "говн", "мудак", "мудил", "залуп", "дроч",
+      "пизда", "пизд", "сука", "сук", "уёб", "урод", "дерьм",
+      "лох", "чмо", "жопа", "попа", "задница", "хрен",
+      "fuck", "shit", "bitch", "ass", "dick", "cunt", "crap",
+      "bastard", "damn", "whore", "slut", "fag", "moron", "retard"],
+    prizeInfo: "",
+    registrationWarning: "",
+    primaryColor: "#29771e",
+    logoUrl: "",
+    roomDigits: 3,
+    scanHint: ""
   };
+}
+
+/* ================================================================
+   CHARACTERS SHEET — хранит массив персонажей в JSON в A1
+   ================================================================ */
+
+function getCharactersSheet() {
+  return SpreadsheetApp.getActiveSpreadsheet().getSheetByName("characters");
+}
+
+function ensureCharactersSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("characters");
+  if (!sheet) {
+    sheet = ss.insertSheet("characters");
+    sheet.getRange("A1").setValue(JSON.stringify(getDefaultCharacters(), null, 2));
+  }
+  return sheet;
+}
+
+function readCharacters() {
+  var sheet = getCharactersSheet();
+  if (!sheet) return getDefaultCharacters();
+  var val = sheet.getRange("A1").getValue();
+  if (!val) return getDefaultCharacters();
+  try {
+    var parsed = JSON.parse(val);
+    return Array.isArray(parsed) ? parsed : getDefaultCharacters();
+  } catch (e) {
+    return getDefaultCharacters();
+  }
+}
+
+function writeCharacters(characters) {
+  var sheet = getCharactersSheet();
+  if (!sheet) sheet = ensureCharactersSheet();
+  sheet.getRange("A1").setValue(JSON.stringify(characters, null, 2));
+}
+
+function getDefaultCharacters() {
+  return [
+    {
+      id: "lobby", name: "Люмен", color: "#2364aa",
+      x: 50, y: 20, enabled: true, active: true, weatherRule: "any",
+      availableFrom: "", availableTo: "",
+      foundPoints: 10, attemptPoints: [30, 20, 10],
+      riddle: "Я встречаю гостей первым, храню ключи и улыбки. Где я?",
+      answers: ["ресепшен", "reception", "стойка регистрации", "лобби"],
+      image: "", imageSolved: "",
+      hintType: "text", hintText: "Я в лобби, подойди ко мне!",
+      hintFoundText: "Ты уже встретил меня!", hintAudio: ""
+    },
+    {
+      id: "cafe", name: "Мира", color: "#d1663f",
+      x: 26, y: 43, enabled: true, active: true, weatherRule: "any",
+      availableFrom: "", availableTo: "",
+      foundPoints: 10, attemptPoints: [30, 20, 10],
+      riddle: "Здесь утро пахнет кофе, а разговоры становятся теплее за маленьким столиком.",
+      answers: ["кафе", "coffee", "кофе", "кофейня"],
+      image: "", imageSolved: "",
+      hintType: "text", hintText: "Я в кафе, загляни туда!",
+      hintFoundText: "Ты меня уже нашёл!", hintAudio: ""
+    },
+    {
+      id: "pool", name: "Ори", color: "#2a8c82",
+      x: 74, y: 43, enabled: true, active: true, weatherRule: "sun",
+      availableFrom: "", availableTo: "",
+      foundPoints: 10, attemptPoints: [30, 20, 10],
+      riddle: "Я отражаю потолок, шепчу водой и жду тех, кто хочет поплавать.",
+      answers: ["бассейн", "pool", "вода"],
+      image: "", imageSolved: "",
+      hintType: "text", hintText: "Я у бассейна, приходи в солнечный день!",
+      hintFoundText: "Ты меня уже нашёл!", hintAudio: "",
+      unavailableHint: "Я появляюсь только в солнечную погоду. Приходи, когда будет солнце!"
+    },
+    {
+      id: "garden", name: "Флора", color: "#6f8f3d",
+      x: 28, y: 76, enabled: true, active: true, weatherRule: "rain",
+      availableFrom: "", availableTo: "",
+      foundPoints: 10, attemptPoints: [30, 20, 10],
+      riddle: "Здесь слышны листья, пахнет землей, а дорожка ведет между зеленью.",
+      answers: ["сад", "garden", "двор", "зелень"],
+      image: "", imageSolved: "",
+      hintType: "text", hintText: "Я в саду, иди под дождём!",
+      hintFoundText: "Ты меня уже нашёл!", hintAudio: "",
+      unavailableHint: "Я появляюсь только в дождливую погоду. Приходи, когда пойдёт дождь!"
+    },
+    {
+      id: "stairs", name: "Степ", color: "#7a5cba",
+      x: 72, y: 76, enabled: true, active: true, weatherRule: "any",
+      availableFrom: "", availableTo: "",
+      foundPoints: 10, attemptPoints: [30, 20, 10],
+      riddle: "Я не лифт, но тоже поднимаю выше. Мои ступени знают путь между этажами.",
+      answers: ["лестница", "stairs", "ступени"],
+      image: "", imageSolved: "",
+      hintType: "text", hintText: "Я на лестнице, поднимись!",
+      hintFoundText: "Ты меня уже нашёл!", hintAudio: ""
+    }
+  ];
 }
 
 /* ================================================================
@@ -202,8 +241,7 @@ function updatePlayer(participant) {
   var sheet = ensurePlayersSheet();
   var data = sheet.getDataRange().getValues();
 
-  var cfg = readConfig();
-  var characters = (cfg.characters || []).filter(function(ch) { return ch.enabled !== false; });
+  var characters = readCharacters().filter(function(ch) { return ch.enabled !== false; });
   var found = 0, solved = 0;
   characters.forEach(function(ch) {
     var spot = participant.spots && participant.spots[ch.id];
@@ -314,10 +352,16 @@ function doGet(e) {
   var action = (e.parameter && e.parameter.action) || "";
 
   if (action === "config") {
-    var cfg = readConfig();
-    // Не отдаём sheetEndpoint наружу
-    delete cfg.sheetEndpoint;
-    return ContentService.createTextOutput(JSON.stringify(cfg))
+    /* Return only settings (no characters) */
+    var settings = readConfig();
+    return ContentService.createTextOutput(JSON.stringify({ settings: settings }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (action === "characters") {
+    /* Return all characters */
+    var characters = readCharacters();
+    return ContentService.createTextOutput(JSON.stringify({ characters: characters }))
       .setMimeType(ContentService.MimeType.JSON);
   }
 
@@ -331,9 +375,10 @@ function doGet(e) {
   return ContentService.createTextOutput(JSON.stringify({
     status: "ok",
     endpoints: {
-      "GET ?action=config": "Получить конфигурацию",
+      "GET ?action=config": "Получить настройки",
+      "GET ?action=characters": "Получить список персонажей",
       "GET ?action=players": "Получить список игроков",
-      "POST { type, sentAt, payload }": "Отправить событие (registered/found/answer/completed/config_update)"
+      "POST { type, sentAt, payload }": "Отправить событие (registered/found/answer/completed/config_update/characters_update)"
     }
   })).setMimeType(ContentService.MimeType.JSON);
 }
@@ -366,9 +411,14 @@ function doPost(e) {
       updatePlayer(participant);
     }
 
-    // Обновляем конфигурацию из админки
-    if (type === "config_update" && payload.characters) {
-      writeConfig(payload);
+    // Обновляем настройки из админки
+    if (type === "config_update" && payload.settings) {
+      writeConfig(payload.settings);
+    }
+
+    // Обновляем персонажей из админки
+    if (type === "characters_update" && payload.characters) {
+      writeCharacters(payload.characters);
     }
 
     // Удаление игрока из таблицы
@@ -405,9 +455,10 @@ function onOpen() {
 
 function initializeSheets() {
   ensureConfigSheet();
+  ensureCharactersSheet();
   ensureEventsSheet();
   ensurePlayersSheet();
-  SpreadsheetApp.getUi().alert("Таблица инициализирована!\n\nЛисты: config, events, players\n\nТеперь задеплойте Web App и вставьте URL в config.js");
+  SpreadsheetApp.getUi().alert("Таблица инициализирована!\n\nЛисты: config, characters, events, players\n\nТеперь задеплойте Web App и вставьте URL в config.js");
 }
 
 function resetAllPlayers() {
