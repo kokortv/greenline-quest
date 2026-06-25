@@ -836,12 +836,13 @@
     /* Portrait: pick image based on state */
     const spot = participant.spots[character.id] || { attempts: 0, solved: false, found: false };
     const solved = spot.solved || false;
-    const imgState = solved ? "solved" : spot.found ? "found" : "default";
+    const found = spot.found || false;
+    const imgState = solved ? "solved" : found ? "found" : "default";
     const imgSrc = getCharacterImage(character, imgState, spot.attempts || 0);
 
     if (imgSrc) {
       avatar.src = imgSrc;
-      avatar.alt = spot.found ? character.name : "???";
+      avatar.alt = found ? character.name : "???";
       avatar.style.display = "";
     } else {
       avatar.src = "";
@@ -924,14 +925,17 @@
         feedback.textContent = spot.lastFeedback;
         feedback.className = "feedback";
       }
-      /* No extra feedback for exhausted — status pill already says it */
+      if (exhausted) {
+        feedback.textContent = "Не угадал, не расстраивайся.";
+        feedback.className = "feedback";
+      }
     } else {
       /* Active riddle — show form */
       byId("riddle-text").textContent = character.riddle;
       answerInput.disabled = false;
       answerInput.focus();
 
-      feedback.textContent = spot.lastFeedback || `Попыток осталось: ${attemptsLeft}. За находку уже начислено ${character.foundPoints} баллов.`;
+      feedback.textContent = spot.lastFeedback || "";
     }
   }
 
@@ -1184,9 +1188,9 @@
         participant.score += bonus;
         spot.lastFeedback = `Верно! Бонус за ${spot.attempts}-ю попытку: +${bonus}.`;
       } else if (spot.attempts >= config.settings.maxAttempts) {
-        spot.lastFeedback = "Попытки закончились. Баллы за находку сохранены.";
+        spot.lastFeedback = "Не угадал, не расстраивайся.";
       } else {
-        spot.lastFeedback = `Пока нет. Осталось попыток: ${config.settings.maxAttempts - spot.attempts}.`;
+        spot.lastFeedback = "Ответ не правильный.";
       }
       participant.spots[character.id] = spot;
       queueEvent("answer", { participant, characterId: character.id, correct });
