@@ -288,8 +288,19 @@
     byId("map-button").hidden = name === "map";
   }
 
-  /** Apply dynamic settings: logo, button color, warning */
+  /** Apply dynamic settings: logo, button color, warning, hotel name */
   function applyDynamicSettings() {
+    /* Hotel name */
+    const hotelName = config.hotelName || config.settings.hotelName || "";
+    if (hotelName) {
+      document.querySelectorAll(".eyebrow").forEach((el) => {
+        if (el.textContent.includes("Green Line") || el.dataset.dynamic) {
+          el.textContent = hotelName;
+          el.dataset.dynamic = "1";
+        }
+      });
+    }
+
     /* Logo */
     const logoUrl = config.settings.logoUrl;
     document.querySelectorAll(".brand-mark").forEach((el) => {
@@ -950,6 +961,12 @@
         saveState(participant);
         queueEvent("completed", participant);
       }
+      /* Clean URL: remove ?spot= when quest is completed */
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("spot")) {
+        url.searchParams.delete("spot");
+        window.history.replaceState({}, "", url);
+      }
       renderFinish(participant, progress);
       setScreen("finish");
       return;
@@ -1192,8 +1209,6 @@
     link.click();
   });
 
-  loadRemoteConfig();
-
   /* Apply dynamic settings immediately (button color, logo, warning) */
   applyDynamicSettings();
 
@@ -1205,6 +1220,13 @@
   } else {
     setScreen("start");
   }
+
+  /* Load remote config from Sheets, then re-apply settings and re-render.
+     For new players without a local draft, this is the primary source of config. */
+  loadRemoteConfig().then(() => {
+    applyDynamicSettings();
+    if (!state) setScreen("start");
+  });
 
   /* Hide loading overlay — wait at least 3 seconds so it doesn't flash */
   const loadingOverlay = byId("loading-overlay");
