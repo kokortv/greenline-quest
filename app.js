@@ -488,22 +488,16 @@
     }
   }
 
-  /** Get character image based on state: not-found → found → solved
-   *  not-found: question mark placeholder
-   *  found (solved on first attempt): imageSolved if available, else image
-   *  found (solved on 2nd+ attempt or not yet solved): image if available, else placeholder
-   *  solved on first attempt: imageSolved if available, else image */
+  /** Get character image based on state:
+   *  default / found but not solved: persona-hidden.png
+   *  solved on 1st attempt: imageSolved if available, else image
+   *  solved on 2nd+ attempt: normal image */
   function getCharacterImage(character, state, attempts) {
     if (state === "solved") {
-      /* First attempt solved → imageSolved, otherwise → normal image */
       if (attempts <= 1 && character.imageSolved) return character.imageSolved;
       return character.image || "images/persona-hidden.png";
     }
-    if (state === "found") {
-      /* Found but not yet solved — show normal image */
-      return character.image || "images/persona-hidden.png";
-    }
-    /* default / hidden state — show placeholder */
+    /* found but not solved, or not found — show placeholder */
     return "images/persona-hidden.png";
   }
 
