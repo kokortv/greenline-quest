@@ -257,6 +257,7 @@ input:focus {
   border: 1.5px solid var(--line);
   background: var(--panel);
   color: var(--ink);
+  margin-top: 20px;
 }
 
 .secondary:hover:not(:disabled) {

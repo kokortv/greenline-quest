@@ -488,10 +488,21 @@
     }
   }
 
-  /** Get character image based on state: not-found → found → solved */
-  function getCharacterImage(character, state) {
-    if (state === "solved" && character.imageSolved) return character.imageSolved;
-    if (state === "found" && character.image) return character.image;
+  /** Get character image based on state: not-found → found → solved
+   *  not-found: question mark placeholder
+   *  found (solved on first attempt): imageSolved if available, else image
+   *  found (solved on 2nd+ attempt or not yet solved): image if available, else placeholder
+   *  solved on first attempt: imageSolved if available, else image */
+  function getCharacterImage(character, state, attempts) {
+    if (state === "solved") {
+      /* First attempt solved → imageSolved, otherwise → normal image */
+      if (attempts <= 1 && character.imageSolved) return character.imageSolved;
+      return character.image || "images/persona-hidden.png";
+    }
+    if (state === "found") {
+      /* Found but not yet solved — show normal image */
+      return character.image || "images/persona-hidden.png";
+    }
     /* default / hidden state — show placeholder */
     return "images/persona-hidden.png";
   }
@@ -508,7 +519,7 @@
       const solved = Boolean(spot?.solved);
       const available = isCharacterAvailable(character);
       const imgState = solved ? "solved" : found ? "found" : "default";
-      const imageUrl = getCharacterImage(character, imgState);
+      const imageUrl = getCharacterImage(character, imgState, spot?.attempts || 0);
 
       const pin = document.createElement("div");
       pin.className = `map-pin ${found ? "is-found" : ""} ${solved ? "is-solved" : ""} ${!found && !available ? "is-unavailable" : ""}`;
@@ -690,7 +701,7 @@
       const found = Boolean(spot?.found);
       const solved = Boolean(spot?.solved);
       const imgState = solved ? "solved" : found ? "found" : "default";
-      const imgSrc = getCharacterImage(character, imgState);
+      const imgSrc = getCharacterImage(character, imgState, spot?.attempts || 0);
       const card = document.createElement("article");
       card.className = `collection-card ${found ? "is-found" : "is-not-found"} ${solved ? "is-solved" : ""}`;
       card.innerHTML = `
@@ -826,7 +837,7 @@
     const spot = participant.spots[character.id] || { attempts: 0, solved: false, found: false };
     const solved = spot.solved || false;
     const imgState = solved ? "solved" : spot.found ? "found" : "default";
-    const imgSrc = getCharacterImage(character, imgState);
+    const imgSrc = getCharacterImage(character, imgState, spot.attempts || 0);
 
     if (imgSrc) {
       avatar.src = imgSrc;
