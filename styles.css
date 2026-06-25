@@ -42,8 +42,8 @@
 }
 
 .loading-overlay .loading-icon {
-  width: 1.2rem;
-  height: 1.2rem;
+  width: 6em;
+  height: auto;
   animation: loadingBounce 1.2s ease-in-out infinite;
 }
 
