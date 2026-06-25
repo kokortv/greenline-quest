@@ -73,7 +73,9 @@ function getDefaultSettings() {
     primaryColor: "#29771e",
     logoUrl: "images/logo.png",
     roomDigits: 3,
-    scanHint: ""
+    scanHint: "",
+    questStatus: "active",
+    closedMessage: ""
   };
 }
 

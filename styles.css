@@ -1509,3 +1509,37 @@ input:disabled {
     min-height: 130px;
   }
 }
+
+/* === Closed screen === */
+.closed-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.closed-banner-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.closed-banner {
+  max-width: 100%;
+  border-radius: var(--radius);
+  animation: closedFloat 3s ease-in-out infinite;
+}
+
+@keyframes closedFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.closed-message {
+  text-align: center;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 320px;
+  margin: 0 auto;
+}

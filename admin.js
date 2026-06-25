@@ -49,7 +49,9 @@
       primaryColor: "#29771e",
       logoUrl: "images/logo.png",
       roomDigits: 3,
-      scanHint: ""
+      scanHint: "",
+      questStatus: "active",
+      closedMessage: ""
     };
   }
 
@@ -171,6 +173,8 @@
     byId("prize-info").value = config.settings.prizeInfo || "";
     byId("registration-warning").value = config.settings.registrationWarning || "";
     byId("scan-hint").value = config.settings.scanHint || "";
+    byId("quest-status").value = config.settings.questStatus === "closed" ? "closed" : "active";
+    byId("closed-message").value = config.settings.closedMessage || "";
 
     /* Primary color */
     const primaryColor = config.settings.primaryColor || "#29771e";
@@ -424,6 +428,8 @@
     config.settings.prizeInfo = byId("prize-info").value.trim();
     config.settings.registrationWarning = byId("registration-warning").value.trim();
     config.settings.scanHint = byId("scan-hint").value.trim();
+    config.settings.questStatus = byId("quest-status").value;
+    config.settings.closedMessage = byId("closed-message").value.trim();
 
     /* Primary color: prefer hex input, fallback to color picker */
     const hexValue = byId("primary-color-hex").value.trim();

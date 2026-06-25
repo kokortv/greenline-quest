@@ -58,7 +58,8 @@
   const screens = {
     start: document.getElementById("start-screen"),
     quest: document.getElementById("quest-screen"),
-    finish: document.getElementById("finish-screen")
+    finish: document.getElementById("finish-screen"),
+    closed: document.getElementById("closed-screen")
   };
 
   const byId = (id) => document.getElementById(id);
@@ -100,7 +101,9 @@
       primaryColor: "#29771e",
       logoUrl: "images/logo.png",
       roomDigits: 3,
-      scanHint: ""
+      scanHint: "",
+      questStatus: "active",
+      closedMessage: ""
     };
   }
 
@@ -1214,32 +1217,49 @@
   /* Apply dynamic settings from whatever config we have so far */
   applyDynamicSettings();
 
+  /* Check if quest is closed */
+  function checkQuestStatus() {
+    if (config.settings.questStatus === "closed") {
+      const msg = config.settings.closedMessage || "Квест временно закрыт. Следите за обновлениями!";
+      byId("closed-message").textContent = msg;
+      setScreen("closed");
+      return true;
+    }
+    return false;
+  }
+
   /* Main initialization: if we have local draft — render immediately,
      then update from Sheets in background. If no draft — wait for Sheets
      before rendering anything (loading overlay stays visible). */
   if (hasLocalDraft) {
-    /* We have data — render immediately */
-    const state = loadState();
-    if (state) {
-      sanitizeState(state);
-      render(state);
-      syncQueue();
+    /* We have data — check closed status first */
+    if (checkQuestStatus()) {
+      hideLoadingOverlay();
     } else {
-      setScreen("start");
+      const state = loadState();
+      if (state) {
+        sanitizeState(state);
+        render(state);
+        syncQueue();
+      } else {
+        setScreen("start");
+      }
+      /* Also update from Sheets in background */
+      loadRemoteConfig().then(() => {
+        applyDynamicSettings();
+        checkQuestStatus();
+      });
+      hideLoadingOverlay();
     }
-
-    /* Also update from Sheets in background */
-    loadRemoteConfig().then(() => {
-      applyDynamicSettings();
-    });
-
-    /* Hide loading overlay */
-    hideLoadingOverlay();
   } else if (config.sheetEndpoint) {
     /* No local draft — must load from Sheets first.
        Keep loading overlay visible until data arrives. */
     loadRemoteConfig().then(() => {
       applyDynamicSettings();
+      if (checkQuestStatus()) {
+        hideLoadingOverlay();
+        return;
+      }
       const state = loadState();
       if (state) {
         sanitizeState(state);

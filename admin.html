@@ -401,6 +401,13 @@
       <h2>Общие настройки</h2>
       <div class="form-grid">
         <label>
+          Квест
+          <select id="quest-status">
+            <option value="active">Открыт</option>
+            <option value="closed">Закрыт</option>
+          </select>
+        </label>
+        <label>
           Погода сегодня
           <select id="current-weather">
             <option value="sun">Солнце</option>
@@ -445,6 +452,11 @@
         Подсказка на карте
         <textarea id="scan-hint" placeholder="Ищите QR-код в отмеченной зоне и сканируйте его камерой телефона."></textarea>
         <span class="hint-text">Показывается под картой в виде информационного блока. Оставьте пустым для текста по умолчанию</span>
+      </label>
+      <label>
+        Сообщение о закрытии квеста
+        <textarea id="closed-message" placeholder="Квест временно закрыт. Следите за обновлениями!"></textarea>
+        <span class="hint-text">Показывается на экране закрытия под картинкой</span>
       </label>
       <div class="form-grid">
         <label>

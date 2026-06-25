@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Green Line Batumi – Квест отеля</title>
+  <title>Квест отеля</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
@@ -169,6 +169,7 @@
       <strong id="final-score">0</strong>
       <span>баллов</span>
     </div>
+    <div class="finish-prizes" id="finish-prizes"></div>
     <div class="finish-stats">
       <div class="finish-stat">
         <svg class="finish-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -191,9 +192,22 @@
         <span class="finish-stat-label">прогресс</span>
       </div>
     </div>
-    <div class="finish-prizes" id="finish-prizes"></div>
     <button class="primary" id="save-result-button" type="button">Сохранить результат</button>
     <canvas id="result-card" width="600" height="900" style="display:none"></canvas>
+  </section>
+
+  <section class="screen" id="closed-screen" aria-labelledby="closed-title">
+    <div class="closed-brand">
+      <div class="brand-mark" id="logo-closed"></div>
+      <div>
+        <p class="eyebrow">Green Line Batumi</p>
+        <h1 id="closed-title">Квест закрыт</h1>
+      </div>
+    </div>
+    <div class="closed-banner-wrap">
+      <img class="closed-banner" src="images/closed-banner.png" alt="Закрыто" onerror="this.style.display='none'" />
+    </div>
+    <p class="closed-message" id="closed-message"></p>
   </section>
 </main>
 
