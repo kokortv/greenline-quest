@@ -27,24 +27,26 @@
     return;
   }
 
-  /* === Load config entirely from localStorage draft === */
+  /* === Load config: localStorage draft → Sheets === */
   const draft = readAdminDraft();
-  let config;
-  if (draft && draft.characters && draft.characters.length > 0) {
-    config = normalizeConfig(draft);
-  } else {
-    /* No draft or no characters — use minimal default (no characters, user must set up via admin) */
-    config = normalizeConfig({
-      sheetEndpoint: cfgRef.sheetEndpoint || "",
-      settings: getDefaultSettings(),
-      rooms: [],
-      characters: []
-    });
-  }
+  const hasLocalDraft = draft && draft.characters && draft.characters.length > 0;
+
+  /* Minimal config for bootstrapping — will be replaced by draft or Sheets */
+  let config = normalizeConfig({
+    sheetEndpoint: cfgRef.sheetEndpoint || "",
+    settings: getDefaultSettings(),
+    rooms: [],
+    characters: []
+  });
 
   /* Ensure sheetEndpoint from config.js is always available */
   if (cfgRef.sheetEndpoint) {
     config.sheetEndpoint = cfgRef.sheetEndpoint;
+  }
+
+  if (hasLocalDraft) {
+    config = normalizeConfig(draft);
+    if (cfgRef.sheetEndpoint) config.sheetEndpoint = cfgRef.sheetEndpoint;
   }
 
   /* Fix old pixel-based coordinates (x>100 or y>100) by clamping to percentages */
@@ -96,7 +98,7 @@
       prizeInfo: "",
       registrationWarning: "",
       primaryColor: "#29771e",
-      logoUrl: "",
+      logoUrl: "images/logo.png",
       roomDigits: 3,
       scanHint: ""
     };
@@ -1209,33 +1211,65 @@
     link.click();
   });
 
-  /* Apply dynamic settings immediately (button color, logo, warning) */
+  /* Apply dynamic settings from whatever config we have so far */
   applyDynamicSettings();
 
-  const state = loadState();
-  if (state) {
-    sanitizeState(state);
-    render(state);
-    syncQueue();
+  /* Main initialization: if we have local draft — render immediately,
+     then update from Sheets in background. If no draft — wait for Sheets
+     before rendering anything (loading overlay stays visible). */
+  if (hasLocalDraft) {
+    /* We have data — render immediately */
+    const state = loadState();
+    if (state) {
+      sanitizeState(state);
+      render(state);
+      syncQueue();
+    } else {
+      setScreen("start");
+    }
+
+    /* Also update from Sheets in background */
+    loadRemoteConfig().then(() => {
+      applyDynamicSettings();
+    });
+
+    /* Hide loading overlay */
+    hideLoadingOverlay();
+  } else if (config.sheetEndpoint) {
+    /* No local draft — must load from Sheets first.
+       Keep loading overlay visible until data arrives. */
+    loadRemoteConfig().then(() => {
+      applyDynamicSettings();
+      const state = loadState();
+      if (state) {
+        sanitizeState(state);
+        render(state);
+        syncQueue();
+      } else {
+        setScreen("start");
+      }
+      hideLoadingOverlay();
+    }).catch(() => {
+      /* Sheets failed — show start screen anyway */
+      applyDynamicSettings();
+      setScreen("start");
+      hideLoadingOverlay();
+    });
   } else {
+    /* No draft, no Sheets — just show start screen */
     setScreen("start");
+    hideLoadingOverlay();
   }
 
-  /* Load remote config from Sheets, then re-apply settings and re-render.
-     For new players without a local draft, this is the primary source of config. */
-  loadRemoteConfig().then(() => {
-    applyDynamicSettings();
-    if (!state) setScreen("start");
-  });
-
-  /* Hide loading overlay — wait at least 3 seconds so it doesn't flash */
-  const loadingOverlay = byId("loading-overlay");
-  if (loadingOverlay) {
-    const minDisplayUntil = Date.now() + 3000;
-    const delay = Math.max(0, minDisplayUntil - Date.now());
-    setTimeout(() => {
-      loadingOverlay.style.opacity = "0";
-      setTimeout(() => { loadingOverlay.style.display = "none"; }, 300);
-    }, delay);
+  function hideLoadingOverlay() {
+    const loadingOverlay = byId("loading-overlay");
+    if (loadingOverlay) {
+      const minDisplayUntil = Date.now() + 1500;
+      const delay = Math.max(0, minDisplayUntil - Date.now());
+      setTimeout(() => {
+        loadingOverlay.style.opacity = "0";
+        setTimeout(() => { loadingOverlay.style.display = "none"; }, 300);
+      }, delay);
+    }
   }
 })();

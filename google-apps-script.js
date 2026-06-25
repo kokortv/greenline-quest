@@ -71,7 +71,7 @@ function getDefaultSettings() {
     prizeInfo: "",
     registrationWarning: "",
     primaryColor: "#29771e",
-    logoUrl: "",
+    logoUrl: "images/logo.png",
     roomDigits: 3,
     scanHint: ""
   };
