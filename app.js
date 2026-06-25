@@ -1231,6 +1231,30 @@
     return false;
   }
 
+  let loadingHidden = false;
+  function hideLoadingOverlay() {
+    if (loadingHidden) return;
+    loadingHidden = true;
+    const loadingOverlay = byId("loading-overlay");
+    if (loadingOverlay) {
+      const minDisplayUntil = Date.now() + 1500;
+      const delay = Math.max(0, minDisplayUntil - Date.now());
+      setTimeout(() => {
+        loadingOverlay.style.opacity = "0";
+        setTimeout(() => { loadingOverlay.style.display = "none"; }, 300);
+      }, delay);
+    }
+  }
+
+  /* Safety net: force-hide loading overlay after 8 seconds no matter what */
+  setTimeout(() => {
+    if (!loadingHidden) {
+      applyDynamicSettings();
+      setScreen("start");
+      hideLoadingOverlay();
+    }
+  }, 8000);
+
   /* Main initialization: if we have local draft — render immediately,
      then update from Sheets in background. If no draft — wait for Sheets
      before rendering anything (loading overlay stays visible). */
@@ -1283,28 +1307,4 @@
     setScreen("start");
     hideLoadingOverlay();
   }
-
-  let loadingHidden = false;
-  function hideLoadingOverlay() {
-    if (loadingHidden) return;
-    loadingHidden = true;
-    const loadingOverlay = byId("loading-overlay");
-    if (loadingOverlay) {
-      const minDisplayUntil = Date.now() + 1500;
-      const delay = Math.max(0, minDisplayUntil - Date.now());
-      setTimeout(() => {
-        loadingOverlay.style.opacity = "0";
-        setTimeout(() => { loadingOverlay.style.display = "none"; }, 300);
-      }, delay);
-    }
-  }
-
-  /* Safety net: force-hide loading overlay after 8 seconds no matter what */
-  setTimeout(() => {
-    if (!loadingHidden) {
-      applyDynamicSettings();
-      setScreen("start");
-      hideLoadingOverlay();
-    }
-  }, 8000);
 })();
