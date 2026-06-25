@@ -27,24 +27,26 @@
     return;
   }
 
-  /* === Load config entirely from localStorage draft === */
+  /* === Load config: localStorage draft → Sheets === */
   const draft = readAdminDraft();
-  let config;
-  if (draft && draft.characters && draft.characters.length > 0) {
-    config = normalizeConfig(draft);
-  } else {
-    /* No draft or no characters — use minimal default (no characters, user must set up via admin) */
-    config = normalizeConfig({
-      sheetEndpoint: cfgRef.sheetEndpoint || "",
-      settings: getDefaultSettings(),
-      rooms: [],
-      characters: []
-    });
-  }
+  const hasLocalDraft = draft && draft.characters && draft.characters.length > 0;
+
+  /* Minimal config for bootstrapping — will be replaced by draft or Sheets */
+  let config = normalizeConfig({
+    sheetEndpoint: cfgRef.sheetEndpoint || "",
+    settings: getDefaultSettings(),
+    rooms: [],
+    characters: []
+  });
 
   /* Ensure sheetEndpoint from config.js is always available */
   if (cfgRef.sheetEndpoint) {
     config.sheetEndpoint = cfgRef.sheetEndpoint;
+  }
+
+  if (hasLocalDraft) {
+    config = normalizeConfig(draft);
+    if (cfgRef.sheetEndpoint) config.sheetEndpoint = cfgRef.sheetEndpoint;
   }
 
   /* Fix old pixel-based coordinates (x>100 or y>100) by clamping to percentages */
@@ -56,7 +58,8 @@
   const screens = {
     start: document.getElementById("start-screen"),
     quest: document.getElementById("quest-screen"),
-    finish: document.getElementById("finish-screen")
+    finish: document.getElementById("finish-screen"),
+    closed: document.getElementById("closed-screen")
   };
 
   const byId = (id) => document.getElementById(id);
@@ -96,9 +99,11 @@
       prizeInfo: "",
       registrationWarning: "",
       primaryColor: "#29771e",
-      logoUrl: "",
+      logoUrl: "images/logo.png",
       roomDigits: 3,
-      scanHint: ""
+      scanHint: "",
+      questStatus: "active",
+      closedMessage: ""
     };
   }
 
@@ -288,8 +293,19 @@
     byId("map-button").hidden = name === "map";
   }
 
-  /** Apply dynamic settings: logo, button color, warning */
+  /** Apply dynamic settings: logo, button color, warning, hotel name */
   function applyDynamicSettings() {
+    /* Hotel name */
+    const hotelName = config.hotelName || config.settings.hotelName || "";
+    if (hotelName) {
+      document.querySelectorAll(".eyebrow").forEach((el) => {
+        if (el.textContent.includes("Green Line") || el.dataset.dynamic) {
+          el.textContent = hotelName;
+          el.dataset.dynamic = "1";
+        }
+      });
+    }
+
     /* Logo */
     const logoUrl = config.settings.logoUrl;
     document.querySelectorAll(".brand-mark").forEach((el) => {
@@ -357,39 +373,28 @@
   /** Update weather icon in topbar */
   function updateWeatherIcon() {
     const btn = byId("weather-button");
-    const svg = byId("weather-svg");
-    if (!btn || !svg) return;
+    const img = byId("weather-img");
+    if (!btn || !img) return;
 
     const weather = config.settings.currentWeather;
     btn.classList.remove("is-sun", "is-rain", "is-cloudy");
 
-    if (weather === "sun") {
-      btn.classList.add("is-sun");
-      btn.setAttribute("aria-label", "Солнце");
-      svg.innerHTML = `
-        <circle cx="12" cy="12" r="5"/>
-        <line x1="12" y1="1" x2="12" y2="3"/>
-        <line x1="12" y1="21" x2="12" y2="23"/>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-        <line x1="1" y1="12" x2="3" y2="12"/>
-        <line x1="21" y1="12" x2="23" y2="12"/>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
-    } else if (weather === "rain") {
-      btn.classList.add("is-rain");
-      btn.setAttribute("aria-label", "Дождь");
-      svg.innerHTML = `
-        <line x1="16" y1="13" x2="16" y2="21"/>
-        <line x1="8" y1="13" x2="8" y2="21"/>
-        <line x1="12" y1="15" x2="12" y2="23"/>
-        <path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"/>`;
-    } else {
-      btn.classList.add("is-cloudy");
-      btn.setAttribute("aria-label", "Облачно");
-      svg.innerHTML = `
-        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>`;
-    }
+    const weatherImages = {
+      sun: "images/sun.png",
+      rain: "images/rain.png",
+      cloudy: "images/cloud.png"
+    };
+    const weatherLabels = {
+      sun: "Солнце",
+      rain: "Дождь",
+      cloudy: "Облачно"
+    };
+
+    const w = weather || "cloudy";
+    btn.classList.add("is-" + w);
+    btn.setAttribute("aria-label", weatherLabels[w]);
+    img.src = weatherImages[w];
+    img.alt = weatherLabels[w];
   }
 
   function getParticipant() {
@@ -950,6 +955,12 @@
         saveState(participant);
         queueEvent("completed", participant);
       }
+      /* Clean URL: remove ?spot= when quest is completed */
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("spot")) {
+        url.searchParams.delete("spot");
+        window.history.replaceState({}, "", url);
+      }
       renderFinish(participant, progress);
       setScreen("finish");
       return;
@@ -1176,6 +1187,9 @@
   byId("map-button").addEventListener("click", () => {
     returnToMap();
   });
+  byId("back-to-map").addEventListener("click", () => {
+    returnToMap();
+  });
   byId("weather-button").addEventListener("click", () => {
     const weather = config.settings.currentWeather;
     const labels = { sun: "Сегодня солнце", rain: "Сегодня дождь", cloudy: "Сегодня облачно" };
@@ -1192,28 +1206,94 @@
     link.click();
   });
 
-  loadRemoteConfig();
-
-  /* Apply dynamic settings immediately (button color, logo, warning) */
+  /* Apply dynamic settings from whatever config we have so far */
   applyDynamicSettings();
 
-  const state = loadState();
-  if (state) {
-    sanitizeState(state);
-    render(state);
-    syncQueue();
-  } else {
-    setScreen("start");
+  /* Check if quest is closed */
+  function checkQuestStatus() {
+    if (config.settings.questStatus === "closed") {
+      const msg = config.settings.closedMessage || "Квест временно закрыт. Следите за обновлениями!";
+      byId("closed-message").textContent = msg;
+      setScreen("closed");
+      return true;
+    }
+    return false;
   }
 
-  /* Hide loading overlay — wait at least 3 seconds so it doesn't flash */
-  const loadingOverlay = byId("loading-overlay");
-  if (loadingOverlay) {
-    const minDisplayUntil = Date.now() + 3000;
-    const delay = Math.max(0, minDisplayUntil - Date.now());
-    setTimeout(() => {
-      loadingOverlay.style.opacity = "0";
-      setTimeout(() => { loadingOverlay.style.display = "none"; }, 300);
-    }, delay);
+  /* Main initialization: if we have local draft — render immediately,
+     then update from Sheets in background. If no draft — wait for Sheets
+     before rendering anything (loading overlay stays visible). */
+  if (hasLocalDraft) {
+    /* We have data — check closed status first */
+    if (checkQuestStatus()) {
+      hideLoadingOverlay();
+    } else {
+      const state = loadState();
+      if (state) {
+        sanitizeState(state);
+        render(state);
+        syncQueue();
+      } else {
+        setScreen("start");
+      }
+      /* Also update from Sheets in background */
+      loadRemoteConfig().then(() => {
+        applyDynamicSettings();
+        checkQuestStatus();
+      });
+      hideLoadingOverlay();
+    }
+  } else if (config.sheetEndpoint) {
+    /* No local draft — must load from Sheets first.
+       Keep loading overlay visible until data arrives. */
+    loadRemoteConfig().then(() => {
+      applyDynamicSettings();
+      if (checkQuestStatus()) {
+        hideLoadingOverlay();
+        return;
+      }
+      const state = loadState();
+      if (state) {
+        sanitizeState(state);
+        render(state);
+        syncQueue();
+      } else {
+        setScreen("start");
+      }
+      hideLoadingOverlay();
+    }).catch(() => {
+      /* Sheets failed — show start screen anyway */
+      applyDynamicSettings();
+      setScreen("start");
+      hideLoadingOverlay();
+    });
+  } else {
+    /* No draft, no Sheets — just show start screen */
+    setScreen("start");
+    hideLoadingOverlay();
   }
+
+  let loadingHidden = false;
+  function hideLoadingOverlay() {
+    if (loadingHidden) return;
+    loadingHidden = true;
+    const loadingOverlay = byId("loading-overlay");
+    if (loadingOverlay) {
+      const minDisplayUntil = Date.now() + 1500;
+      const delay = Math.max(0, minDisplayUntil - Date.now());
+      setTimeout(() => {
+        loadingOverlay.style.opacity = "0";
+        setTimeout(() => { loadingOverlay.style.display = "none"; }, 300);
+      }, delay);
+    }
+  }
+
+  /* Safety net: force-hide loading overlay after 8 seconds no matter what */
+  setTimeout(() => {
+    if (!loadingHidden) {
+      applyDynamicSettings();
+      setScreen("start");
+      hideLoadingOverlay();
+    }
+  }, 8000);
 })();

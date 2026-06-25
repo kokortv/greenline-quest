@@ -355,7 +355,8 @@ input:disabled {
   -webkit-tap-highlight-color: transparent;
 }
 
-.topbar-chip .icon {
+.topbar-chip .icon,
+.topbar-chip-img {
   width: 20px;
   height: 20px;
 }
@@ -912,12 +913,10 @@ input:disabled {
 .profile-avatar-icon {
   width: 100%;
   height: 100%;
-  display: grid;
-  place-items: center;
-  background: rgba(255, 253, 247, 0.15);
+  display: block;
   border-radius: 50%;
   padding: 14px;
-  color: #fffdf7;
+  object-fit: contain;
 }
 
 .profile-info {
