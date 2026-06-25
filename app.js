@@ -27,26 +27,24 @@
     return;
   }
 
-  /* === Load config: localStorage draft → Sheets === */
+  /* === Load config entirely from localStorage draft === */
   const draft = readAdminDraft();
-  const hasLocalDraft = draft && draft.characters && draft.characters.length > 0;
-
-  /* Minimal config for bootstrapping — will be replaced by draft or Sheets */
-  let config = normalizeConfig({
-    sheetEndpoint: cfgRef.sheetEndpoint || "",
-    settings: getDefaultSettings(),
-    rooms: [],
-    characters: []
-  });
+  let config;
+  if (draft && draft.characters && draft.characters.length > 0) {
+    config = normalizeConfig(draft);
+  } else {
+    /* No draft or no characters — use minimal default (no characters, user must set up via admin) */
+    config = normalizeConfig({
+      sheetEndpoint: cfgRef.sheetEndpoint || "",
+      settings: getDefaultSettings(),
+      rooms: [],
+      characters: []
+    });
+  }
 
   /* Ensure sheetEndpoint from config.js is always available */
   if (cfgRef.sheetEndpoint) {
     config.sheetEndpoint = cfgRef.sheetEndpoint;
-  }
-
-  if (hasLocalDraft) {
-    config = normalizeConfig(draft);
-    if (cfgRef.sheetEndpoint) config.sheetEndpoint = cfgRef.sheetEndpoint;
   }
 
   /* Fix old pixel-based coordinates (x>100 or y>100) by clamping to percentages */
@@ -58,8 +56,7 @@
   const screens = {
     start: document.getElementById("start-screen"),
     quest: document.getElementById("quest-screen"),
-    finish: document.getElementById("finish-screen"),
-    closed: document.getElementById("closed-screen")
+    finish: document.getElementById("finish-screen")
   };
 
   const byId = (id) => document.getElementById(id);
@@ -99,11 +96,9 @@
       prizeInfo: "",
       registrationWarning: "",
       primaryColor: "#29771e",
-      logoUrl: "images/logo.png",
+      logoUrl: "",
       roomDigits: 3,
-      scanHint: "",
-      questStatus: "active",
-      closedMessage: ""
+      scanHint: ""
     };
   }
 
@@ -293,19 +288,8 @@
     byId("map-button").hidden = name === "map";
   }
 
-  /** Apply dynamic settings: logo, button color, warning, hotel name */
+  /** Apply dynamic settings: logo, button color, warning */
   function applyDynamicSettings() {
-    /* Hotel name */
-    const hotelName = config.hotelName || config.settings.hotelName || "";
-    if (hotelName) {
-      document.querySelectorAll(".eyebrow").forEach((el) => {
-        if (el.textContent.includes("Green Line") || el.dataset.dynamic) {
-          el.textContent = hotelName;
-          el.dataset.dynamic = "1";
-        }
-      });
-    }
-
     /* Logo */
     const logoUrl = config.settings.logoUrl;
     document.querySelectorAll(".brand-mark").forEach((el) => {
@@ -966,12 +950,6 @@
         saveState(participant);
         queueEvent("completed", participant);
       }
-      /* Clean URL: remove ?spot= when quest is completed */
-      const url = new URL(window.location.href);
-      if (url.searchParams.has("spot")) {
-        url.searchParams.delete("spot");
-        window.history.replaceState({}, "", url);
-      }
       renderFinish(participant, progress);
       setScreen("finish");
       return;
@@ -1214,82 +1192,28 @@
     link.click();
   });
 
-  /* Apply dynamic settings from whatever config we have so far */
+  loadRemoteConfig();
+
+  /* Apply dynamic settings immediately (button color, logo, warning) */
   applyDynamicSettings();
 
-  /* Check if quest is closed */
-  function checkQuestStatus() {
-    if (config.settings.questStatus === "closed") {
-      const msg = config.settings.closedMessage || "Квест временно закрыт. Следите за обновлениями!";
-      byId("closed-message").textContent = msg;
-      setScreen("closed");
-      return true;
-    }
-    return false;
-  }
-
-  /* Main initialization: if we have local draft — render immediately,
-     then update from Sheets in background. If no draft — wait for Sheets
-     before rendering anything (loading overlay stays visible). */
-  if (hasLocalDraft) {
-    /* We have data — check closed status first */
-    if (checkQuestStatus()) {
-      hideLoadingOverlay();
-    } else {
-      const state = loadState();
-      if (state) {
-        sanitizeState(state);
-        render(state);
-        syncQueue();
-      } else {
-        setScreen("start");
-      }
-      /* Also update from Sheets in background */
-      loadRemoteConfig().then(() => {
-        applyDynamicSettings();
-        checkQuestStatus();
-      });
-      hideLoadingOverlay();
-    }
-  } else if (config.sheetEndpoint) {
-    /* No local draft — must load from Sheets first.
-       Keep loading overlay visible until data arrives. */
-    loadRemoteConfig().then(() => {
-      applyDynamicSettings();
-      if (checkQuestStatus()) {
-        hideLoadingOverlay();
-        return;
-      }
-      const state = loadState();
-      if (state) {
-        sanitizeState(state);
-        render(state);
-        syncQueue();
-      } else {
-        setScreen("start");
-      }
-      hideLoadingOverlay();
-    }).catch(() => {
-      /* Sheets failed — show start screen anyway */
-      applyDynamicSettings();
-      setScreen("start");
-      hideLoadingOverlay();
-    });
+  const state = loadState();
+  if (state) {
+    sanitizeState(state);
+    render(state);
+    syncQueue();
   } else {
-    /* No draft, no Sheets — just show start screen */
     setScreen("start");
-    hideLoadingOverlay();
   }
 
-  function hideLoadingOverlay() {
-    const loadingOverlay = byId("loading-overlay");
-    if (loadingOverlay) {
-      const minDisplayUntil = Date.now() + 1500;
-      const delay = Math.max(0, minDisplayUntil - Date.now());
-      setTimeout(() => {
-        loadingOverlay.style.opacity = "0";
-        setTimeout(() => { loadingOverlay.style.display = "none"; }, 300);
-      }, delay);
-    }
+  /* Hide loading overlay — wait at least 3 seconds so it doesn't flash */
+  const loadingOverlay = byId("loading-overlay");
+  if (loadingOverlay) {
+    const minDisplayUntil = Date.now() + 3000;
+    const delay = Math.max(0, minDisplayUntil - Date.now());
+    setTimeout(() => {
+      loadingOverlay.style.opacity = "0";
+      setTimeout(() => { loadingOverlay.style.display = "none"; }, 300);
+    }, delay);
   }
 })();
