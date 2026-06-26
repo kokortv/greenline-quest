@@ -706,6 +706,10 @@
 
       card.addEventListener("click", () => {
         if (found) {
+          if (character.hintType === "voice" && character.hintAudio) {
+            const audio = new Audio(character.hintAudio);
+            audio.play().catch(() => {});
+          }
           navigateToCharacter(character.id);
         } else {
           showHintBubble(character, participant, card);

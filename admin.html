@@ -468,12 +468,9 @@
           <span class="hint-text">Применяется ко всем основным кнопкам. По умолчанию #29771e</span>
         </label>
         <label>
-          Логотип отеля
-          <div style="display:flex;gap:8px;align-items:center;">
-            <img class="image-preview" id="logo-preview" src="" alt="Лого" style="width:50px;height:50px;border-radius:8px;" />
-            <input type="file" id="logo-file" accept="image/*" style="flex:1;" />
-          </div>
-          <span class="hint-text">Загрузите логотип — он заменит букву «H» в шапке на всех страницах</span>
+          Логотип отеля (URL)
+          <input id="logo-url" placeholder="images/logo.png" />
+          <span class="hint-text">Укажите путь к логотипу — он заменит букву «H» в шапке на всех страницах</span>
         </label>
       </div>
     </div>
@@ -568,18 +565,6 @@
         <span class="hint-text">Картинка после решения загадки (другая поза)</span>
       </label>
     </div>
-    <div class="form-grid images">
-      <label>
-        Загрузить изображение
-        <input type="file" data-field="imageFile" accept="image/*" />
-        <img class="image-preview" data-preview="image" src="" alt="превью" />
-      </label>
-      <label>
-        Загрузить изображение (решено)
-        <input type="file" data-field="imageSolvedFile" accept="image/*" />
-        <img class="image-preview" data-preview="imageSolved" src="" alt="превью" />
-      </label>
-    </div>
 
     <div class="form-grid hint">
       <label>
@@ -590,10 +575,15 @@
         </select>
       </label>
       <label>
-        Текст подсказки (или URL аудио)
+        Текст подсказки
         <input data-field="hintText" placeholder="Нажми на меня, я шепну..." />
       </label>
     </div>
+    <label>
+      URL аудио для голосовой подсказки
+      <input data-field="hintAudio" placeholder="voices/character-1.wav" />
+      <span class="hint-text">Укажите путь к аудиофайлу (например voices/char-name.wav). Воспроизводится при типе подсказки «Голос»</span>
+    </label>
     <label>
       Фраза, если персонаж уже найден
       <input data-field="hintFoundText" placeholder="Ты уже меня нашёл!" />
@@ -602,11 +592,6 @@
       Подсказка, если персонаж недоступен
       <input data-field="unavailableHint" placeholder="Приходи в солнечную погоду!" />
       <span class="hint-text">Показывается вместо «Персонаж недоступен». Укажите когда персонаж будет доступен</span>
-    </label>
-    <label>
-      Аудио-файл для голосовой подсказки (загрузите, если выбран тип "Голос")
-      <input type="file" data-field="hintAudio" accept="audio/*" />
-      <span data-preview="hintAudio"></span>
     </label>
 
     </div>

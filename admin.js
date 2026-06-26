@@ -182,9 +182,9 @@
     byId("primary-color-hex").value = primaryColor;
 
     /* Logo */
-    const logoPreview = byId("logo-preview");
-    if (logoPreview && config.settings.logoUrl) {
-      logoPreview.src = config.settings.logoUrl;
+    const logoUrl = byId("logo-url");
+    if (logoUrl) {
+      logoUrl.value = config.settings.logoUrl || "";
     }
 
     renderCharacters();
@@ -261,34 +261,6 @@
         }
         input.addEventListener("input", () => updateCharacter(index, field, input.value));
         input.addEventListener("change", () => updateCharacter(index, field, input.value));
-      });
-
-      const preview = node.querySelector('[data-preview="image"]');
-      if (preview && character.image) {
-        preview.src = character.image;
-      }
-      const previewSolved = node.querySelector('[data-preview="imageSolved"]');
-      if (previewSolved && character.imageSolved) {
-        previewSolved.src = character.imageSolved;
-      }
-
-      node.querySelectorAll('input[type="file"]').forEach((fileInput) => {
-        const field = fileInput.dataset.field;
-        fileInput.addEventListener("change", (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-          const reader = new FileReader();
-          reader.onload = (ev) => {
-            const dataUrl = ev.target.result;
-            const targetField = field === "imageSolvedFile" ? "imageSolved" : "image";
-            character[targetField] = dataUrl;
-            const preview = node.querySelector(`[data-preview="${targetField}"]`);
-            if (preview) preview.src = dataUrl;
-            const textInput = node.querySelector(`[data-field="${targetField}"]`);
-            if (textInput) textInput.value = dataUrl;
-          };
-          reader.readAsDataURL(file);
-        });
       });
 
       /* QR code section */
@@ -439,7 +411,7 @@
       config.settings.primaryColor = byId("primary-color").value || "#29771e";
     }
 
-    /* logoUrl is set via file upload handler, no need to collect from input */
+    config.settings.logoUrl = byId("logo-url")?.value?.trim() || config.settings.logoUrl;
 
     config.rooms = config.rooms || [];
   }
@@ -922,17 +894,9 @@
     }
   });
 
-  /* Logo upload */
-  byId("logo-file").addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      config.settings.logoUrl = ev.target.result;
-      const preview = byId("logo-preview");
-      if (preview) preview.src = config.settings.logoUrl;
-    };
-    reader.readAsDataURL(file);
+  /* Logo URL input */
+  byId("logo-url").addEventListener("input", (e) => {
+    config.settings.logoUrl = e.target.value.trim();
   });
 
   document.querySelectorAll("[data-admin-tab]").forEach((button) => {
