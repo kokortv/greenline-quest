@@ -179,6 +179,8 @@
    *  Only admin disabling (enabled=false) removes the found status. */
   function sanitizeState(participant) {
     if (!participant || !participant.spots) return participant;
+    /* Completed players are frozen — no further changes */
+    if (participant.status === "completed") return participant;
     let changed = false;
     for (const character of config.characters) {
       const spot = participant.spots[character.id];
@@ -469,6 +471,17 @@
   }
 
   function getProgress(participant) {
+    /* Completed players use frozen snapshot */
+    if (participant.status === "completed" && participant.completedSnapshot) {
+      const snap = participant.completedSnapshot;
+      return {
+        characters: new Array(snap.totalCharacters),
+        found: snap.foundCount,
+        solved: snap.solvedCount,
+        completed: snap.foundCount,
+        percent: snap.percent
+      };
+    }
     const all = getEnabledCharacters();
     const found = all.filter((ch) => participant.spots[ch.id]?.found).length;
     const solved = all.filter((ch) => participant.spots[ch.id]?.solved).length;
@@ -963,6 +976,13 @@
       if (!participant.completedAt) {
         participant.completedAt = new Date().toISOString();
         participant.status = "completed";
+        /* Freeze progress snapshot so future character changes don't affect this player */
+        participant.completedSnapshot = {
+          totalCharacters: progress.characters.length,
+          foundCount: progress.found,
+          solvedCount: progress.solved,
+          percent: progress.percent
+        };
         saveState(participant);
         queueEvent("completed", participant);
       }
