@@ -568,6 +568,11 @@
     const available = isCharacterAvailable(character);
 
     if (character.enabled === false || (!available && !found)) {
+      /* Even unavailable characters can have voice hints */
+      if (character.hintType === "voice" && character.hintAudio) {
+        const audio = new Audio(character.hintAudio);
+        audio.play().catch(() => {});
+      }
       const hint = character.unavailableHint || "Персонаж недоступен";
       showBubble(hint, pinElement, "#65717b");
       return;
