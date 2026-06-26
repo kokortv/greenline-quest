@@ -583,15 +583,12 @@
 
     const bubbleColor = character.color;
 
-    if (character.hintType === "voice" && character.hintAudio) {
+    /* Voice hint only plays for not-yet-found characters */
+    if (!found && character.hintType === "voice" && character.hintAudio) {
       const audio = new Audio(character.hintAudio);
-      audio.play().catch(() => {
-        showBubble("Не удалось воспроизвести аудио", pinElement, character.color);
-      });
-      showBubble("Слушай подсказку", pinElement, character.color);
-    } else {
-      showBubble(message, pinElement, bubbleColor);
+      audio.play().catch(() => {});
     }
+    showBubble(message, pinElement, bubbleColor);
   }
 
   let bubbleTimeout = null;
@@ -711,10 +708,6 @@
 
       card.addEventListener("click", () => {
         if (found) {
-          if (character.hintType === "voice" && character.hintAudio) {
-            const audio = new Audio(character.hintAudio);
-            audio.play().catch(() => {});
-          }
           navigateToCharacter(character.id);
         } else {
           showHintBubble(character, participant, card);
