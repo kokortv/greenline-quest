@@ -1252,12 +1252,8 @@
     loadingHidden = true;
     const loadingOverlay = byId("loading-overlay");
     if (loadingOverlay) {
-      const minDisplayUntil = Date.now() + 1500;
-      const delay = Math.max(0, minDisplayUntil - Date.now());
-      setTimeout(() => {
-        loadingOverlay.style.opacity = "0";
-        setTimeout(() => { loadingOverlay.style.display = "none"; }, 300);
-      }, delay);
+      loadingOverlay.style.opacity = "0";
+      setTimeout(() => { loadingOverlay.style.display = "none"; }, 300);
     }
   }
 
