@@ -580,12 +580,13 @@
     const found = Boolean(spot?.found);
     const available = isCharacterAvailable(character);
 
+    /* Voice hint plays for all not-yet-found characters */
+    if (!found && character.hintType === "voice" && character.hintAudio) {
+      const audio = new Audio(character.hintAudio);
+      audio.play().catch(() => {});
+    }
+
     if (character.enabled === false || (!available && !found)) {
-      /* Even unavailable characters can have voice hints */
-      if (character.hintType === "voice" && character.hintAudio) {
-        const audio = new Audio(character.hintAudio);
-        audio.play().catch(() => {});
-      }
       const hint = character.unavailableHint || "Персонаж недоступен";
       showBubble(hint, pinElement, "#65717b");
       return;
@@ -595,12 +596,6 @@
     if (!message) message = found ? "Ты уже нашёл меня!" : "Попробуй найти меня!";
 
     const bubbleColor = character.color;
-
-    /* Voice hint only plays for not-yet-found characters */
-    if (!found && character.hintType === "voice" && character.hintAudio) {
-      const audio = new Audio(character.hintAudio);
-      audio.play().catch(() => {});
-    }
     showBubble(message, pinElement, bubbleColor);
   }
 
