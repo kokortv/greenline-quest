@@ -352,7 +352,7 @@
     if (rulesEl) {
       const rulesText = config.settings.rulesText;
       if (rulesText) {
-        rulesEl.textContent = rulesText;
+        rulesEl.innerHTML = rulesText;
       }
       if (rulesBlock) {
         rulesBlock.style.display = rulesText ? "" : "none";
