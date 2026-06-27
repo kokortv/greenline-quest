@@ -179,6 +179,41 @@ h2 {
   object-position: center;
 }
 
+/* === Rules block === */
+.rules-block {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin: 0 0 18px;
+  padding: 16px 18px;
+  border: 2px solid var(--green);
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--green-light), #f0faf5);
+  box-shadow: 0 2px 12px rgba(31, 122, 91, 0.1);
+}
+
+.rules-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.rules-block p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--ink);
+  font-weight: 500;
+}
+
 /* === Panels === */
 .panel {
   border: 1px solid var(--line);

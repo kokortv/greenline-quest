@@ -102,6 +102,7 @@
       logoUrl: "images/logo.png",
       roomDigits: 3,
       scanHint: "",
+      rulesText: "",
       questStatus: "active",
       closedMessage: ""
     };
@@ -343,6 +344,19 @@
     const scanHintEl = byId("scan-hint");
     if (scanHintEl) {
       scanHintEl.textContent = config.settings.scanHint || "Ищите QR-код в отмеченной зоне и сканируйте его камерой телефона.";
+    }
+
+    /* Rules text */
+    const rulesEl = byId("rules-text");
+    const rulesBlock = byId("rules-block");
+    if (rulesEl) {
+      const rulesText = config.settings.rulesText;
+      if (rulesText) {
+        rulesEl.textContent = rulesText;
+      }
+      if (rulesBlock) {
+        rulesBlock.style.display = rulesText ? "" : "none";
+      }
     }
 
     /* Room number input: restrict to digits, set max length */

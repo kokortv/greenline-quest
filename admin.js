@@ -50,6 +50,7 @@
       logoUrl: "images/logo.png",
       roomDigits: 3,
       scanHint: "",
+      rulesText: "",
       questStatus: "active",
       closedMessage: ""
     };
@@ -173,6 +174,7 @@
     byId("prize-info").value = config.settings.prizeInfo || "";
     byId("registration-warning").value = config.settings.registrationWarning || "";
     byId("scan-hint").value = config.settings.scanHint || "";
+    byId("rules-text").value = config.settings.rulesText || "";
     byId("quest-status").value = config.settings.questStatus === "closed" ? "closed" : "active";
     byId("closed-message").value = config.settings.closedMessage || "";
 
@@ -400,6 +402,7 @@
     config.settings.prizeInfo = byId("prize-info").value.trim();
     config.settings.registrationWarning = byId("registration-warning").value.trim();
     config.settings.scanHint = byId("scan-hint").value.trim();
+    config.settings.rulesText = byId("rules-text").value.trim();
     config.settings.questStatus = byId("quest-status").value;
     config.settings.closedMessage = byId("closed-message").value.trim();
 
