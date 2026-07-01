@@ -477,11 +477,17 @@
           <span class="hint-text">Пароль для входа в админку. Хранится в Google Sheets, не в коде</span>
         </label>
         <label>
-          Квест
+          Статус квеста
           <select id="quest-status">
             <option value="active">Открыт</option>
             <option value="closed">Закрыт</option>
           </select>
+          <span class="hint-text">Если закрыт — игроки видят экран закрытия вместо квеста</span>
+        </label>
+        <label>
+          Сообщение о закрытии
+          <textarea id="closed-message" placeholder="Квест временно закрыт. Следите за обновлениями!"></textarea>
+          <span class="hint-text">Показывается на экране закрытия под картинкой</span>
         </label>
         <label>
           Погода сегодня
@@ -490,34 +496,40 @@
             <option value="rain">Дождь</option>
             <option value="cloudy">Облачно</option>
           </select>
+          <span class="hint-text">Влияет на появление персонажей с погодным правилом</span>
         </label>
         <label>
           Попыток на загадку
           <input id="max-attempts" inputmode="numeric" />
+          <span class="hint-text">Сколько попыток даётся на одну загадку</span>
         </label>
         <label>
           Цифр в номере комнаты
           <input id="room-digits" inputmode="numeric" min="1" max="5" />
+          <span class="hint-text">Количество цифр в номере комнаты при регистрации</span>
         </label>
         <label>
           Название финала
           <input id="finish-title" />
+          <span class="hint-text">Заголовок на финальном экране, когда все персонажи найдены</span>
         </label>
       </div>
       <div class="form-grid">
         <label>
           Текст хорошего финала
           <textarea id="finish-success"></textarea>
+          <span class="hint-text">Показывается, если все загадки отгаданы</span>
         </label>
         <label>
           Текст ободряющего финала
           <textarea id="finish-support"></textarea>
+          <span class="hint-text">Показывается, если не все загадки отгаданы</span>
         </label>
       </div>
       <label>
         Информация о призах
         <textarea id="prize-info" placeholder="Покажите этот текст гостю на финальном экране..."></textarea>
-        <span class="hint-text">Отображается на финальном экране над кнопкой сохранения</span>
+        <span class="hint-text">Отображается на финальном экране под баллами</span>
       </label>
       <label>
         Предупреждение при регистрации
@@ -525,19 +537,14 @@
         <span class="hint-text">Показывается над кнопкой «Начать игру» на стартовой странице</span>
       </label>
       <label>
-        Подсказка на карте
-        <textarea id="scan-hint" placeholder="Ищите QR-код в отмеченной зоне и сканируйте его камерой телефона."></textarea>
-        <span class="hint-text">Показывается под картой в виде информационного блока. Оставьте пустым для текста по умолчанию</span>
-      </label>
-      <label>
         Правила игры
         <textarea id="rules-text" placeholder="<b>Ищи QR-коды вокруг!</b> Они прячутся в разных местах отеля..."></textarea>
         <span class="hint-text">Показывается на стартовой странице под картинкой. Поддерживает HTML-теги. Если пусто — блок правил скрыт</span>
       </label>
       <label>
-        Сообщение о закрытии квеста
-        <textarea id="closed-message" placeholder="Квест временно закрыт. Следите за обновлениями!"></textarea>
-        <span class="hint-text">Показывается на экране закрытия под картинкой</span>
+        Подсказка на карте
+        <textarea id="scan-hint" placeholder="Ищите QR-код в отмеченной зоне и сканируйте его камерой телефона."></textarea>
+        <span class="hint-text">Показывается под картой в виде информационного блока. Оставьте пустым для текста по умолчанию</span>
       </label>
       <div class="form-grid">
         <label>
@@ -551,7 +558,7 @@
         <label>
           Логотип отеля (URL)
           <input id="logo-url" placeholder="images/logo.png" />
-          <span class="hint-text">Укажите путь к логотипу — он заменит букву «H» в шапке на всех страницах</span>
+          <span class="hint-text">Путь к логотипу — заменяет букву «H» в шапке на всех страницах</span>
         </label>
       </div>
     </div>

@@ -40,7 +40,13 @@ function readConfig() {
   var val = sheet.getRange("A1").getValue();
   if (!val) return getDefaultSettings();
   try {
-    return JSON.parse(val);
+    var parsed = JSON.parse(val);
+    /* Migration: if old format has nested settings, use that */
+    if (parsed && parsed.settings && typeof parsed.settings === "object") {
+      return Object.assign(getDefaultSettings(), parsed.settings);
+    }
+    /* Otherwise return merged with defaults */
+    return Object.assign(getDefaultSettings(), parsed);
   } catch (e) {
     return getDefaultSettings();
   }
@@ -49,7 +55,15 @@ function readConfig() {
 function writeConfig(settings) {
   var sheet = getConfigSheet();
   if (!sheet) sheet = ensureConfigSheet();
-  sheet.getRange("A1").setValue(JSON.stringify(settings, null, 2));
+  /* Only store settings keys — strip any old top-level junk */
+  var defaults = getDefaultSettings();
+  var clean = {};
+  Object.keys(defaults).forEach(function (key) {
+    if (settings[key] !== undefined) {
+      clean[key] = settings[key];
+    }
+  });
+  sheet.getRange("A1").setValue(JSON.stringify(clean, null, 2));
 }
 
 function getDefaultSettings() {
@@ -116,7 +130,15 @@ function readCharacters() {
 function writeCharacters(characters) {
   var sheet = getCharactersSheet();
   if (!sheet) sheet = ensureCharactersSheet();
-  sheet.getRange("A1").setValue(JSON.stringify(characters, null, 2));
+  /* Strip deprecated fields like 'place' */
+  var clean = (characters || []).map(function (ch) {
+    var copy = {};
+    Object.keys(ch).forEach(function (key) {
+      if (key !== "place") copy[key] = ch[key];
+    });
+    return copy;
+  });
+  sheet.getRange("A1").setValue(JSON.stringify(clean, null, 2));
 }
 
 function getDefaultCharacters() {

@@ -300,7 +300,7 @@
   /** Apply dynamic settings: logo, button color, warning, hotel name */
   function applyDynamicSettings() {
     /* Hotel name */
-    const hotelName = config.settings.hotelName || config.hotelName || "";
+    const hotelName = config.settings.hotelName || "";
     if (hotelName) {
       document.querySelectorAll(".eyebrow").forEach((el) => {
         if (el.textContent.includes("Green Line") || el.dataset.dynamic) {
