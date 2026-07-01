@@ -374,10 +374,76 @@
                 bottom: calc(-1.4 * 8vmin);
           }
         }
+        /* Auth screen */
+        .auth-screen {
+          position: fixed;
+          inset: 0;
+          z-index: 9999;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--green-light);
+          padding: 20px;
+        }
+        .auth-card {
+          width: min(100%, 360px);
+          padding: 32px 24px;
+          background: var(--panel);
+          border: 1px solid var(--line);
+          border-radius: var(--radius);
+          box-shadow: var(--shadow-lg);
+          text-align: center;
+        }
+        .auth-card .eyebrow {
+          margin-bottom: 4px;
+        }
+        .auth-card h1 {
+          margin: 0 0 20px;
+          font-size: 1.5rem;
+        }
+        .auth-card form {
+          display: grid;
+          gap: 12px;
+        }
+        .auth-card input {
+          width: 100%;
+          min-height: 48px;
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          padding: 10px 14px;
+          background: #fff;
+          color: var(--ink);
+          font-size: 1rem;
+          text-align: center;
+        }
+        .auth-card .primary {
+          width: 100%;
+        }
+        .auth-card .feedback {
+          margin: 0;
+          min-height: 20px;
+        }
+        .auth-screen[hidden] {
+          display: none;
+        }
   </style>
 </head>
 <body>
-<main class="app admin-app">
+
+<!-- Экран ввода пароля -->
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-card">
+    <p class="eyebrow">Green Line Batumi</p>
+    <h1>Вход в админку</h1>
+    <form id="auth-form">
+      <input id="auth-password" type="password" placeholder="Пароль" autocomplete="current-password" required />
+      <button class="primary" type="submit">Войти</button>
+      <p class="feedback feedback-error" id="auth-error" role="status"></p>
+    </form>
+  </div>
+</div>
+
+<main class="app admin-app" id="admin-main" hidden>
   <header class="admin-header">
     <div>
       <p class="eyebrow">Green Line Batumi</p>
@@ -400,6 +466,11 @@
     <div class="admin-section">
       <h2>Общие настройки</h2>
       <div class="form-grid">
+        <label>
+          Название отеля
+          <input id="hotel-name" placeholder="Green Line Batumi" />
+          <span class="hint-text">Показывается рядом с логотипом на всех страницах</span>
+        </label>
         <label>
           Квест
           <select id="quest-status">

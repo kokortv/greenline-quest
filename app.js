@@ -103,6 +103,7 @@
       roomDigits: 3,
       scanHint: "",
       rulesText: "",
+      hotelName: "Green Line Batumi",
       questStatus: "active",
       closedMessage: ""
     };
@@ -299,7 +300,7 @@
   /** Apply dynamic settings: logo, button color, warning, hotel name */
   function applyDynamicSettings() {
     /* Hotel name */
-    const hotelName = config.hotelName || config.settings.hotelName || "";
+    const hotelName = config.settings.hotelName || config.hotelName || "";
     if (hotelName) {
       document.querySelectorAll(".eyebrow").forEach((el) => {
         if (el.textContent.includes("Green Line") || el.dataset.dynamic) {

@@ -2,6 +2,49 @@
   const draftKey = "hotelQuestAdminDraft";
   const participantKey = "hotelQuestParticipant";
 
+  /* === Auth: simple password protection === */
+  const ADMIN_PASSWORD = "green2025"; /* change this to your password */
+  const authKey = "hotelQuestAdminAuth";
+  const authScreen = document.getElementById("auth-screen");
+  const adminMain = document.getElementById("admin-main");
+
+  function checkAuth() {
+    const params = new URLSearchParams(window.location.search);
+    const urlKey = params.get("key");
+    const sessionAuth = sessionStorage.getItem(authKey);
+    if (urlKey === ADMIN_PASSWORD || sessionAuth === "1") {
+      sessionStorage.setItem(authKey, "1");
+      authScreen.hidden = true;
+      adminMain.hidden = false;
+      return true;
+    }
+    authScreen.hidden = false;
+    adminMain.hidden = true;
+    return false;
+  }
+
+  document.getElementById("auth-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const password = document.getElementById("auth-password").value;
+    const errorEl = document.getElementById("auth-error");
+    if (password === ADMIN_PASSWORD) {
+      sessionStorage.setItem(authKey, "1");
+      authScreen.hidden = true;
+      adminMain.hidden = false;
+      errorEl.textContent = "";
+      /* Now that we're authenticated, run init */
+      initApp();
+    } else {
+      errorEl.textContent = "Неверный пароль";
+    }
+  });
+
+  /* If already authenticated (session or URL key), run app immediately */
+  if (checkAuth()) {
+    initApp();
+  }
+
+  function initApp() {
   /* === URL reset: ?reset or ?reset=config or ?reset=progress === */
   const urlParams = new URLSearchParams(window.location.search);
   const resetParam = urlParams.get("reset");
@@ -51,6 +94,7 @@
       roomDigits: 3,
       scanHint: "",
       rulesText: "",
+      hotelName: "Green Line Batumi",
       questStatus: "active",
       closedMessage: ""
     };
@@ -87,7 +131,6 @@
   function getDefaultConfig() {
     return {
       sheetEndpoint: window.HOTEL_QUEST_CONFIG ? window.HOTEL_QUEST_CONFIG.sheetEndpoint : "",
-      hotelName: "Green Line Batumi",
       settings: getDefaultSettings(),
       rooms: ["101", "102", "103", "104", "201", "202", "203", "204", "301", "302", "303", "304"],
       characters: getDefaultCharacters()
@@ -165,6 +208,7 @@
   }
 
   function render() {
+    byId("hotel-name").value = config.settings.hotelName || "";
     byId("current-weather").value = config.settings.currentWeather;
     byId("max-attempts").value = config.settings.maxAttempts;
     byId("room-digits").value = config.settings.roomDigits || 3;
@@ -393,6 +437,7 @@
   }
 
   function collectSettings() {
+    config.settings.hotelName = byId("hotel-name").value.trim();
     config.settings.currentWeather = byId("current-weather").value;
     config.settings.maxAttempts = Number(byId("max-attempts").value || 3);
     config.settings.roomDigits = Math.max(1, Math.min(5, Number(byId("room-digits").value || 3)));
@@ -908,4 +953,5 @@
 
   render();
   loadRemoteConfig();
+  } /* end of initApp */
 })();

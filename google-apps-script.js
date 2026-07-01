@@ -74,6 +74,8 @@ function getDefaultSettings() {
     logoUrl: "images/logo.png",
     roomDigits: 3,
     scanHint: "",
+    rulesText: "",
+    hotelName: "Green Line Batumi",
     questStatus: "active",
     closedMessage: ""
   };
