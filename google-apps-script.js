@@ -76,6 +76,7 @@ function getDefaultSettings() {
     scanHint: "",
     rulesText: "",
     hotelName: "Green Line Batumi",
+    adminPassword: "green2025",
     questStatus: "active",
     closedMessage: ""
   };
@@ -327,6 +328,16 @@ function doGet(e) {
   if (action === "players") {
     var players = getPlayersList();
     return ContentService.createTextOutput(JSON.stringify({ players: players }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (action === "verifyAdmin") {
+    /* Server-side password check — password is stored in settings, not in client code */
+    var password = (e.parameter && e.parameter.password) || "";
+    var cfg = readConfig();
+    var adminPassword = cfg.adminPassword || "green2025";
+    var ok = password && password === adminPassword;
+    return ContentService.createTextOutput(JSON.stringify({ ok: ok }))
       .setMimeType(ContentService.MimeType.JSON);
   }
 

@@ -2,46 +2,68 @@
   const draftKey = "hotelQuestAdminDraft";
   const participantKey = "hotelQuestParticipant";
 
-  /* === Auth: simple password protection === */
-  const ADMIN_PASSWORD = "green2025"; /* change this to your password */
+  /* === Auth: server-side password verification === */
+  /* Password is NOT stored in code — it's checked against Google Sheets via Apps Script */
   const authKey = "hotelQuestAdminAuth";
   const authScreen = document.getElementById("auth-screen");
   const adminMain = document.getElementById("admin-main");
+  const sheetEndpoint = window.HOTEL_QUEST_CONFIG ? window.HOTEL_QUEST_CONFIG.sheetEndpoint : "";
 
-  function checkAuth() {
-    const params = new URLSearchParams(window.location.search);
-    const urlKey = params.get("key");
-    const sessionAuth = sessionStorage.getItem(authKey);
-    if (urlKey === ADMIN_PASSWORD || sessionAuth === "1") {
-      sessionStorage.setItem(authKey, "1");
-      authScreen.hidden = true;
-      adminMain.hidden = false;
-      return true;
-    }
+  function showAuthScreen() {
     authScreen.hidden = false;
     adminMain.hidden = true;
-    return false;
   }
 
-  document.getElementById("auth-form").addEventListener("submit", (e) => {
+  function showAdminApp() {
+    authScreen.hidden = true;
+    adminMain.hidden = false;
+  }
+
+  async function verifyPassword(password) {
+    if (!sheetEndpoint) {
+      /* Fallback: no endpoint configured — deny access */
+      return false;
+    }
+    try {
+      const url = `${sheetEndpoint}?action=verifyAdmin&password=${encodeURIComponent(password)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      return Boolean(data.ok);
+    } catch (err) {
+      return false;
+    }
+  }
+
+  document.getElementById("auth-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const password = document.getElementById("auth-password").value;
     const errorEl = document.getElementById("auth-error");
-    if (password === ADMIN_PASSWORD) {
+    const submitBtn = e.target.querySelector("button[type=submit]");
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Проверка…";
+    errorEl.textContent = "";
+
+    const ok = await verifyPassword(password);
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Войти";
+
+    if (ok) {
       sessionStorage.setItem(authKey, "1");
-      authScreen.hidden = true;
-      adminMain.hidden = false;
-      errorEl.textContent = "";
-      /* Now that we're authenticated, run init */
+      showAdminApp();
       initApp();
     } else {
-      errorEl.textContent = "Неверный пароль";
+      errorEl.textContent = "Неверный пароль или нет связи с сервером";
     }
   });
 
-  /* If already authenticated (session or URL key), run app immediately */
-  if (checkAuth()) {
+  /* Check existing session */
+  if (sessionStorage.getItem(authKey) === "1") {
+    showAdminApp();
     initApp();
+  } else {
+    showAuthScreen();
   }
 
   function initApp() {
@@ -95,6 +117,7 @@
       scanHint: "",
       rulesText: "",
       hotelName: "Green Line Batumi",
+      adminPassword: "green2025",
       questStatus: "active",
       closedMessage: ""
     };
@@ -209,6 +232,7 @@
 
   function render() {
     byId("hotel-name").value = config.settings.hotelName || "";
+    byId("admin-password").value = config.settings.adminPassword || "";
     byId("current-weather").value = config.settings.currentWeather;
     byId("max-attempts").value = config.settings.maxAttempts;
     byId("room-digits").value = config.settings.roomDigits || 3;
@@ -438,6 +462,7 @@
 
   function collectSettings() {
     config.settings.hotelName = byId("hotel-name").value.trim();
+    config.settings.adminPassword = byId("admin-password").value.trim() || "green2025";
     config.settings.currentWeather = byId("current-weather").value;
     config.settings.maxAttempts = Number(byId("max-attempts").value || 3);
     config.settings.roomDigits = Math.max(1, Math.min(5, Number(byId("room-digits").value || 3)));
