@@ -1285,8 +1285,10 @@
      then update from Sheets in background. If no draft — wait for Sheets
      before rendering anything (loading overlay stays visible). */
   if (hasLocalDraft) {
-    /* We have data — check closed status first */
-    if (checkQuestStatus()) {
+    /* Show closed screen immediately if local draft says so, but ALWAYS
+       fetch fresh status from Sheets to override stale local data */
+    const wasClosedLocally = checkQuestStatus();
+    if (wasClosedLocally) {
       hideLoadingOverlay();
     } else {
       const state = loadState();
@@ -1297,13 +1299,28 @@
       } else {
         setScreen("start");
       }
-      /* Also update from Sheets in background */
-      loadRemoteConfig().then(() => {
-        applyDynamicSettings();
-        checkQuestStatus();
-      });
       hideLoadingOverlay();
     }
+    /* Always fetch from Sheets — status may have changed */
+    loadRemoteConfig().then(() => {
+      applyDynamicSettings();
+      /* Re-check status after fresh data from Sheets */
+      const isClosedNow = checkQuestStatus();
+      if (wasClosedLocally && !isClosedNow) {
+        /* Was closed locally, now open — render normal state */
+        const state = loadState();
+        if (state) {
+          sanitizeState(state);
+          render(state);
+          syncQueue();
+        } else {
+          setScreen("start");
+        }
+      } else if (!wasClosedLocally && isClosedNow) {
+        /* Was open locally, now closed — show closed screen */
+        setScreen("closed");
+      }
+    });
   } else if (config.sheetEndpoint) {
     /* No local draft — must load from Sheets first.
        Keep loading overlay visible until data arrives. */
